@@ -1,5 +1,3 @@
-// +build linux
-
 /*
 Copyright 2015 The Kubernetes Authors.
 
@@ -23,7 +21,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"syscall"
 	"time"
 )
 
@@ -46,7 +43,7 @@ func init() {
 	flag.StringVar(&fsTypePath, "fs_type", "", "Path to print the fs type for")
 	flag.StringVar(&fileModePath, "file_mode", "", "Path to print the mode bits of")
 	flag.StringVar(&filePermPath, "file_perm", "", "Path to print the perms of")
-	flag.StringVar(&fileOwnerPath, "file_owner", "", "Path to print the owning UID and GID of")
+	flag.StringVar(&fileOwnerPath, "file_owner", "", "Path to print the owning UID and GID or SID of")
 	flag.StringVar(&newFilePath0644, "new_file_0644", "", "Path to write to and read from with perm 0644")
 	flag.StringVar(&newFilePath0666, "new_file_0666", "", "Path to write to and read from with perm 0666")
 	flag.StringVar(&newFilePath0660, "new_file_0660", "", "Path to write to and read from with perm 0660")
@@ -68,7 +65,7 @@ func main() {
 	)
 
 	// Clear the umask so we can set any mode bits we want.
-	syscall.Umask(0000)
+	Umask(0000)
 
 	// NOTE: the ordering of execution of the various command line
 	// flags is intentional and allows a single command to:
@@ -136,29 +133,6 @@ func main() {
 	os.Exit(0)
 }
 
-// Defined by Linux (sys/statfs.h) - the type number for tmpfs mounts.
-const linuxTmpfsMagic = 0x01021994
-
-func fsType(path string) error {
-	if path == "" {
-		return nil
-	}
-
-	buf := syscall.Statfs_t{}
-	if err := syscall.Statfs(path, &buf); err != nil {
-		fmt.Printf("error from statfs(%q): %v\n", path, err)
-		return err
-	}
-
-	if buf.Type == linuxTmpfsMagic {
-		fmt.Printf("mount type of %q: tmpfs\n", path)
-	} else {
-		fmt.Printf("mount type of %q: %v\n", path, buf.Type)
-	}
-
-	return nil
-}
-
 func fileMode(path string) error {
 	if path == "" {
 		return nil
@@ -189,28 +163,12 @@ func filePerm(path string) error {
 	return nil
 }
 
-func fileOwner(path string) error {
-	if path == "" {
-		return nil
-	}
-
-	buf := syscall.Stat_t{}
-	if err := syscall.Stat(path, &buf); err != nil {
-		fmt.Printf("error from stat(%q): %v\n", path, err)
-		return err
-	}
-
-	fmt.Printf("owner UID of %q: %v\n", path, buf.Uid)
-	fmt.Printf("owner GID of %q: %v\n", path, buf.Gid)
-	return nil
-}
-
 func readFileContent(path string) error {
 	if path == "" {
 		return nil
 	}
 
-	contentBytes, err := ioutil.ReadFile(path)
+	contentBytes, err := ReadFile(path)
 	if err != nil {
 		fmt.Printf("error reading file content for %q: %v\n", path, err)
 		return err
@@ -252,7 +210,7 @@ func testFileContent(filePath string, retryDuration int, breakOnExpectedContent 
 
 	retryTime := time.Second * time.Duration(retryDuration)
 	for start := time.Now(); time.Since(start) < retryTime; time.Sleep(2 * time.Second) {
-		contentBytes, err = ioutil.ReadFile(filePath)
+		contentBytes, err = ReadFile(filePath)
 		if err != nil {
 			fmt.Printf("Error reading file %s: %v, retrying\n", filePath, err)
 			continue
