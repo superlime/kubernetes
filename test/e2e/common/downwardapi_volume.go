@@ -64,8 +64,9 @@ var _ = Describe("[sig-storage] Downward API volume", func() {
 		defaultMode := int32(0400)
 		pod := downwardAPIVolumePodForModeTest(podName, "/etc/podinfo/podname", nil, &defaultMode)
 
-		f.TestContainerOutput("downward API volume plugin", pod, 0, []string{
-			"mode of file \"/etc/podinfo/podname\": -r--------",
+		fileModeRegexp := framework.GetFileModeRegex("/etc/podinfo/podname", &defaultMode)
+		f.TestContainerOutputRegexp("downward API volume plugin", pod, 0, []string{
+			fileModeRegexp,
 		})
 	})
 
@@ -79,8 +80,9 @@ var _ = Describe("[sig-storage] Downward API volume", func() {
 		mode := int32(0400)
 		pod := downwardAPIVolumePodForModeTest(podName, "/etc/podinfo/podname", &mode, nil)
 
-		f.TestContainerOutput("downward API volume plugin", pod, 0, []string{
-			"mode of file \"/etc/podinfo/podname\": -r--------",
+		fileModeRegexp := framework.GetFileModeRegex("/etc/podinfo/podname", &mode)
+		f.TestContainerOutputRegexp("downward API volume plugin", pod, 0, []string{
+			fileModeRegexp,
 		})
 	})
 
@@ -108,8 +110,9 @@ var _ = Describe("[sig-storage] Downward API volume", func() {
 			RunAsUser: &uid,
 			FSGroup:   &gid,
 		}
-		f.TestContainerOutput("downward API volume plugin", pod, 0, []string{
-			"mode of file \"/etc/podinfo/podname\": -r--r-----",
+		fileModeRegexp := framework.GetFileModeRegex("/etc/podinfo/podname", &mode)
+		f.TestContainerOutputRegexp("downward API volume plugin", pod, 0, []string{
+			fileModeRegexp,
 		})
 	})
 
