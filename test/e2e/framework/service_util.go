@@ -791,7 +791,7 @@ func newNetexecPodSpec(podName string, httpPort, udpPort int32, hostNetwork bool
 					},
 				},
 			},
-			HostNetwork: hostNetwork,
+			//HostNetwork: hostNetwork,
 		},
 	}
 	return pod

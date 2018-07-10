@@ -50,12 +50,12 @@ var _ = framework.KubeDescribe("Security Context", func() {
 					Containers: []v1.Container{
 						{
 							Name:    "test-container-1",
-							Image:   "busybox",
+							Image:   busyboxImage,
 							Command: []string{"/bin/top"},
 						},
 						{
 							Name:    "test-container-2",
-							Image:   "busybox",
+							Image:   busyboxImage,
 							Command: []string{"/bin/sleep"},
 							Args:    []string{"10000"},
 						},
@@ -91,12 +91,12 @@ var _ = framework.KubeDescribe("Security Context", func() {
 					Containers: []v1.Container{
 						{
 							Name:    "test-container-1",
-							Image:   "busybox",
+							Image:   busyboxImage,
 							Command: []string{"/bin/top"},
 						},
 						{
 							Name:    "test-container-2",
-							Image:   "busybox",
+							Image:   busyboxImage,
 							Command: []string{"/bin/sleep"},
 							Args:    []string{"10000"},
 						},
@@ -415,7 +415,7 @@ var _ = framework.KubeDescribe("Security Context", func() {
 		createAndWaitUserPod := func(readOnlyRootFilesystem bool) string {
 			podName := fmt.Sprintf("busybox-readonly-%v-%s", readOnlyRootFilesystem, uuid.NewUUID())
 			podClient.Create(makeUserPod(podName,
-				"busybox",
+				busyboxImage,
 				[]string{"sh", "-c", "touch checkfile"},
 				readOnlyRootFilesystem,
 			))

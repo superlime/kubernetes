@@ -17,7 +17,9 @@ limitations under the License.
 package common
 
 import (
+	"bytes"
 	"fmt"
+	"text/template"
 	"time"
 
 	"k8s.io/api/core/v1"
@@ -42,7 +44,7 @@ const (
 
 var (
 	mountImage   = imageutils.GetE2EImage(imageutils.Mounttest)
-	busyboxImage = "busybox"
+	busyboxImage = imageutils.GetE2EImage(imageutils.BusyBox)
 )
 
 var CurrentSuite Suite
@@ -52,7 +54,7 @@ var CurrentSuite Suite
 // only used by node e2e test.
 // TODO(random-liu): Change the image puller pod to use similar mechanism.
 var CommonImageWhiteList = sets.NewString(
-	"busybox",
+	imageutils.GetE2EImage(imageutils.BusyBox),
 	imageutils.GetE2EImage(imageutils.EntrypointTester),
 	imageutils.GetE2EImage(imageutils.IpcUtils),
 	imageutils.GetE2EImage(imageutils.Liveness),
@@ -67,6 +69,61 @@ var CommonImageWhiteList = sets.NewString(
 	imageutils.GetE2EImage(imageutils.VolumeGlusterServer),
 	imageutils.GetE2EImage(imageutils.E2ENet),
 )
+
+var testImages = struct {
+	BusyBoxImage      string
+	CassandraImage    string
+	CassandraE2ETestImage string
+	GBFrontendImage   string
+	GBRedisSlaveImage string
+	HazelcastImage    string
+	KittenImage       string
+	LivenessImage     string
+	MounttestImage    string
+	NautilusImage     string
+	NginxSlimImage    string
+	NginxSlimNewImage string
+	PauseImage        string
+	RedisImage        string
+	RethinkdbImage    string
+	SparkImage        string
+	StormNimbusImage  string
+	StormWorkerImage  string
+	ZookeeperImage    string
+}{
+	imageutils.GetE2EImage(imageutils.BusyBox),
+	imageutils.GetE2EImage(imageutils.Cassandra),
+	imageutils.GetE2EImage(imageutils.CassandraE2ETest),
+	imageutils.GetE2EImage(imageutils.GBFrontend),
+	imageutils.GetE2EImage(imageutils.GBRedisSlave),
+	imageutils.GetE2EImage(imageutils.Hazelcast),
+	imageutils.GetE2EImage(imageutils.Kitten),
+	imageutils.GetE2EImage(imageutils.Liveness),
+	imageutils.GetE2EImage(imageutils.Mounttest),
+	imageutils.GetE2EImage(imageutils.Nautilus),
+	imageutils.GetE2EImage(imageutils.NginxSlim),
+	imageutils.GetE2EImage(imageutils.NginxSlimNew),
+	imageutils.GetE2EImage(imageutils.Pause),
+	imageutils.GetE2EImage(imageutils.Redis),
+	imageutils.GetE2EImage(imageutils.Rethinkdb),
+	imageutils.GetE2EImage(imageutils.Spark),
+	imageutils.GetE2EImage(imageutils.StormNimbus),
+	imageutils.GetE2EImage(imageutils.StormWorker),
+	imageutils.GetE2EImage(imageutils.Zookeeper),
+}
+
+func SubstituteImageName(content string) string {
+        contentWithImageName := new(bytes.Buffer)
+        tmpl, err := template.New("imagemanifest").Parse(content)
+        if err != nil {
+                framework.Failf("Failed Parse the template:", err)
+        }
+        err = tmpl.Execute(contentWithImageName, testImages)
+        if err != nil {
+                framework.Failf("Failed executing template:", err)
+        }
+        return contentWithImageName.String()
+}
 
 func svcByName(name string, port int) *v1.Service {
 	return &v1.Service{
