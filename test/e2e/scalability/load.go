@@ -178,7 +178,7 @@ var _ = SIGDescribe("Load capacity", func() {
 
 	loadTests := []Load{
 		// The container will consume 1 cpu and 512mb of memory.
-		{podsPerNode: 3, image: "jess/stress", command: []string{"stress", "-c", "1", "-m", "2"}, kind: api.Kind("ReplicationController")},
+		{podsPerNode: 3, image: "e2eteam/busybox:1.24", command: []string{"ping", "-t", "localhost"}, kind: api.Kind("ReplicationController")},
 		{podsPerNode: 30, image: framework.ServeHostnameImage, kind: api.Kind("ReplicationController")},
 		// Tests for other resource types
 		{podsPerNode: 30, image: framework.ServeHostnameImage, kind: extensions.Kind("Deployment")},
