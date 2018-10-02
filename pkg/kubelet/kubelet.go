@@ -1817,6 +1817,7 @@ func (kl *Kubelet) syncLoop(updates <-chan kubetypes.PodUpdate, handler SyncHand
 	)
 	duration := base
 	for {
+		glog.V(2).Infof("SyncLoop: Restarting the loop...")
 		if rs := kl.runtimeState.runtimeErrors(); len(rs) != 0 {
 			glog.Infof("skipping pod synchronization - %v", rs)
 			// exponential backoff
@@ -1873,6 +1874,7 @@ func (kl *Kubelet) syncLoopIteration(configCh <-chan kubetypes.PodUpdate, handle
 	case u, open := <-configCh:
 		// Update from a config source; dispatch it to the right handler
 		// callback.
+		glog.V(2).Infof("SyncLoop: Treating config channel...")
 		if !open {
 			glog.Errorf("Update channel is closed. Exiting the sync loop.")
 			return false
@@ -1922,6 +1924,7 @@ func (kl *Kubelet) syncLoopIteration(configCh <-chan kubetypes.PodUpdate, handle
 			kl.sourcesReady.AddSource(u.Source)
 		}
 	case e := <-plegCh:
+		glog.V(2).Infof("SyncLoop: Treating PLEG channel...")
 		if isSyncPodWorthy(e) {
 			// PLEG event for a pod; sync it.
 			if pod, ok := kl.podManager.GetPodByUID(e.ID); ok {
@@ -1940,6 +1943,7 @@ func (kl *Kubelet) syncLoopIteration(configCh <-chan kubetypes.PodUpdate, handle
 		}
 	case <-syncCh:
 		// Sync pods waiting for sync
+		glog.V(2).Infof("SyncLoop: Treating sync channel...")
 		podsToSync := kl.getPodsToSync()
 		if len(podsToSync) == 0 {
 			break
@@ -1947,6 +1951,7 @@ func (kl *Kubelet) syncLoopIteration(configCh <-chan kubetypes.PodUpdate, handle
 		glog.V(4).Infof("SyncLoop (SYNC): %d pods; %s", len(podsToSync), format.Pods(podsToSync))
 		handler.HandlePodSyncs(podsToSync)
 	case update := <-kl.livenessManager.Updates():
+		glog.V(2).Infof("SyncLoop: Treating liveness manager updates...")
 		if update.Result == proberesults.Failure {
 			// The liveness manager detected a failure; sync the pod.
 
@@ -1962,6 +1967,7 @@ func (kl *Kubelet) syncLoopIteration(configCh <-chan kubetypes.PodUpdate, handle
 			handler.HandlePodSyncs([]*v1.Pod{pod})
 		}
 	case <-housekeepingCh:
+		glog.V(2).Infof("SyncLoop: Treating housekeeping channel...")
 		if !kl.sourcesReady.AllReady() {
 			// If the sources aren't ready or volume manager has not yet synced the states,
 			// skip housekeeping, as we may accidentally delete pods from unready sources.
