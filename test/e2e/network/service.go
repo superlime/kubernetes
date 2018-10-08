@@ -251,7 +251,7 @@ var _ = SIGDescribe("Services", func() {
 
 		// This behavior is not supported if Kube-proxy is in "userspace" mode.
 		// So we check the kube-proxy mode and skip this test if that's the case.
-		if proxyMode, err := framework.ProxyMode(f); err == nil {
+		if proxyMode, err := framework.ProxyMode(f, false); err == nil {
 			if proxyMode == "userspace" {
 				framework.Skipf("The test doesn't work with kube-proxy in userspace mode")
 			}

@@ -513,7 +513,7 @@ func (config *NetworkingTestConfig) DeleteNodePortService() {
 
 func (config *NetworkingTestConfig) createTestPods() {
 	testContainerPod := config.createTestPodSpec()
-	hostTestContainerPod := NewHostExecPodSpec(config.Namespace, hostTestPodName)
+	hostTestContainerPod := NewHostExecPodSpec(config.Namespace, hostTestPodName, false)
 
 	config.createPod(testContainerPod)
 	config.createPod(hostTestContainerPod)
