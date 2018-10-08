@@ -252,7 +252,7 @@ var _ = SIGDescribe("Services", func() {
 
 		// This behavior is not supported if Kube-proxy is in "userspace" mode.
 		// So we check the kube-proxy mode and skip this test if that's the case.
-		if proxyMode, err := framework.ProxyMode(f); err == nil {
+		if proxyMode, err := framework.ProxyMode(f, false); err == nil {
 			if proxyMode == "userspace" {
 				framework.Skipf("The test doesn't work with kube-proxy in userspace mode")
 			}
@@ -491,7 +491,7 @@ var _ = SIGDescribe("Services", func() {
 		jig.TestReachableHTTP(nodeIP, nodePort, framework.KubeProxyLagTimeout)
 
 		By("verifying the node port is locked")
-		hostExec := framework.LaunchHostExecPod(f.ClientSet, f.Namespace.Name, "hostexec")
+		hostExec := framework.LaunchHostExecPod(f.ClientSet, f.Namespace.Name, "hostexec", true)
 		// Even if the node-ip:node-port check above passed, this hostexec pod
 		// might fall on a node with a laggy kube-proxy.
 		cmd := fmt.Sprintf(`for i in $(seq 1 300); do if ss -ant46 'sport = :%d' | grep ^LISTEN; then exit 0; fi; sleep 1; done; exit 1`, nodePort)
@@ -1220,7 +1220,7 @@ var _ = SIGDescribe("Services", func() {
 		err = t.DeleteService(serviceName)
 		Expect(err).NotTo(HaveOccurred(), "failed to delete service: %s in namespace: %s", serviceName, ns)
 
-		hostExec := framework.LaunchHostExecPod(f.ClientSet, f.Namespace.Name, "hostexec")
+		hostExec := framework.LaunchHostExecPod(f.ClientSet, f.Namespace.Name, "hostexec", false)
 		cmd := fmt.Sprintf(`! ss -ant46 'sport = :%d' | tail -n +2 | grep LISTEN`, nodePort)
 		var stdout string
 		if pollErr := wait.PollImmediate(framework.Poll, framework.KubeProxyLagTimeout, func() (bool, error) {
@@ -1506,7 +1506,7 @@ var _ = SIGDescribe("Services", func() {
 		//  a pod to test the service.
 		By("hitting the internal load balancer from pod")
 		e2elog.Logf("creating pod with host network")
-		hostExec := framework.LaunchHostExecPod(f.ClientSet, f.Namespace.Name, "ilb-host-exec")
+		hostExec := framework.LaunchHostExecPod(f.ClientSet, f.Namespace.Name, "ilb-host-exec", false)
 
 		e2elog.Logf("Waiting up to %v for service %q's internal LB to respond to requests", createTimeout, serviceName)
 		tcpIngressIP := framework.GetIngressPoint(lbIngress)
