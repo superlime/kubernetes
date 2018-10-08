@@ -443,14 +443,14 @@ func NodeOSDistroIs(supportedNodeOsDistros ...string) bool {
 }
 
 // ProxyMode returns a proxyMode of a kube-proxy.
-func ProxyMode(f *Framework) (string, error) {
+func ProxyMode(f *Framework, hostNetwork bool) (string, error) {
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "kube-proxy-mode-detector",
 			Namespace: f.Namespace.Name,
 		},
 		Spec: v1.PodSpec{
-			HostNetwork: true,
+			HostNetwork: hostNetwork,
 			Containers: []v1.Container{
 				{
 					Name:    "detector",
@@ -3346,8 +3346,8 @@ func RunHostCmdWithRetries(ns, name, cmd string, interval, timeout time.Duration
 
 // LaunchHostExecPod launches a hostexec pod in the given namespace and waits
 // until it's Running
-func LaunchHostExecPod(client clientset.Interface, ns, name string) *v1.Pod {
-	hostExecPod := NewExecPodSpec(ns, name, true)
+func LaunchHostExecPod(client clientset.Interface, ns, name string, hostNetwork bool) *v1.Pod {
+	hostExecPod := NewExecPodSpec(ns, name, hostNetwork)
 	pod, err := client.CoreV1().Pods(ns).Create(hostExecPod)
 	ExpectNoError(err)
 	err = WaitForPodRunningInNamespace(client, pod)
