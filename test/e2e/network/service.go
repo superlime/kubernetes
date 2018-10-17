@@ -308,13 +308,13 @@ var _ = SIGDescribe("Services", func() {
 		Expect(sourceIp2).To(Equal(execPodIp2))
 	})
 
-	It("should be able to up and down services", func() {
+	SkippableIt("should be able to up and down services", func() {
 		// TODO: use the ServiceTestJig here
 		// this test uses framework.NodeSSHHosts that does not work if a Node only reports LegacyHostIP
 		framework.SkipUnlessProviderIs(framework.ProvidersWithSSH...)
 		// this test does not work if the Node does not support SSH Key
 		framework.SkipUnlessSSHKeyPresent()
-
+	}, func() {
 		ns := f.Namespace.Name
 		numPods, servicePort := 3, defaultServeHostnameServicePort
 
@@ -363,10 +363,10 @@ var _ = SIGDescribe("Services", func() {
 		framework.ExpectNoError(framework.VerifyServeHostnameServiceUp(cs, ns, host, podNames3, svc3IP, servicePort))
 	})
 
-	It("should work after restarting kube-proxy [Disruptive]", func() {
+	SkippableIt("should work after restarting kube-proxy [Disruptive]", func() {
 		// TODO: use the ServiceTestJig here
 		framework.SkipUnlessProviderIs("gce", "gke")
-
+	}, func() {
 		ns := f.Namespace.Name
 		numPods, servicePort := 3, defaultServeHostnameServicePort
 
@@ -419,10 +419,10 @@ var _ = SIGDescribe("Services", func() {
 		framework.ExpectNoError(framework.VerifyServeHostnameServiceUp(cs, ns, host, podNames2, svc2IP, servicePort))
 	})
 
-	It("should work after restarting apiserver [Disruptive]", func() {
+	SkippableIt("should work after restarting apiserver [Disruptive]", func() {
 		// TODO: use the ServiceTestJig here
 		framework.SkipUnlessProviderIs("gce", "gke")
-
+	}, func() {
 		ns := f.Namespace.Name
 		numPods, servicePort := 3, 80
 
@@ -501,10 +501,10 @@ var _ = SIGDescribe("Services", func() {
 	})
 
 	// TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
-	It("should be able to change the type and ports of a service [Slow] [DisabledForLargeClusters]", func() {
+	SkippableIt("should be able to change the type and ports of a service [Slow] [DisabledForLargeClusters]", func() {
 		// requires cloud load-balancer support
 		framework.SkipUnlessProviderIs("gce", "gke", "aws")
-
+	}, func() {
 		loadBalancerSupportsUDP := !framework.ProviderIs("aws")
 
 		loadBalancerLagTimeout := framework.LoadBalancerLagTimeoutDefault
@@ -1351,10 +1351,10 @@ var _ = SIGDescribe("Services", func() {
 		}
 	})
 
-	It("should only allow access from service loadbalancer source ranges [Slow]", func() {
+	SkippableIt("should only allow access from service loadbalancer source ranges [Slow]", func() {
 		// this feature currently supported only on GCE/GKE/AWS
 		framework.SkipUnlessProviderIs("gce", "gke", "aws")
-
+	}, func() {
 		loadBalancerLagTimeout := framework.LoadBalancerLagTimeoutDefault
 		if framework.ProviderIs("aws") {
 			loadBalancerLagTimeout = framework.LoadBalancerLagTimeoutAWS
@@ -1428,9 +1428,9 @@ var _ = SIGDescribe("Services", func() {
 	})
 
 	// TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
-	It("should be able to create an internal type load balancer [Slow] [DisabledForLargeClusters]", func() {
+	SkippableIt("should be able to create an internal type load balancer [Slow] [DisabledForLargeClusters]", func() {
 		framework.SkipUnlessProviderIs("azure", "gke", "gce")
-
+	}, func() {
 		createTimeout := framework.LoadBalancerCreateTimeoutDefault
 		if nodes := framework.GetReadySchedulableNodesOrDie(cs); len(nodes.Items) > framework.LargeClusterMinNodesNumber {
 			createTimeout = framework.LoadBalancerCreateTimeoutLarge
@@ -1570,10 +1570,10 @@ var _ = SIGDescribe("Services", func() {
 	})
 
 	// TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
-	It("should have session affinity work for LoadBalancer service with ESIPP on [Slow] [DisabledForLargeClusters]", func() {
+	SkippableIt("should have session affinity work for LoadBalancer service with ESIPP on [Slow] [DisabledForLargeClusters]", func() {
 		// L4 load balancer affinity `ClientIP` is not supported on AWS ELB.
 		framework.SkipIfProviderIs("aws")
-
+	}, func() {
 		svc := getServeHostnameService("service")
 		svc.Spec.Type = v1.ServiceTypeLoadBalancer
 		svc.Spec.ExternalTrafficPolicy = v1.ServiceExternalTrafficPolicyTypeLocal
@@ -1581,10 +1581,10 @@ var _ = SIGDescribe("Services", func() {
 	})
 
 	// TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
-	It("should be able to switch session affinity for LoadBalancer service with ESIPP on [Slow] [DisabledForLargeClusters]", func() {
+	SkippableIt("should be able to switch session affinity for LoadBalancer service with ESIPP on [Slow] [DisabledForLargeClusters]", func() {
 		// L4 load balancer affinity `ClientIP` is not supported on AWS ELB.
 		framework.SkipIfProviderIs("aws")
-
+	}, func() {
 		svc := getServeHostnameService("service")
 		svc.Spec.Type = v1.ServiceTypeLoadBalancer
 		svc.Spec.ExternalTrafficPolicy = v1.ServiceExternalTrafficPolicyTypeLocal
@@ -1592,10 +1592,10 @@ var _ = SIGDescribe("Services", func() {
 	})
 
 	// TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
-	It("should have session affinity work for LoadBalancer service with ESIPP off [Slow] [DisabledForLargeClusters]", func() {
+	SkippableIt("should have session affinity work for LoadBalancer service with ESIPP off [Slow] [DisabledForLargeClusters]", func() {
 		// L4 load balancer affinity `ClientIP` is not supported on AWS ELB.
 		framework.SkipIfProviderIs("aws")
-
+	}, func() {
 		svc := getServeHostnameService("service")
 		svc.Spec.Type = v1.ServiceTypeLoadBalancer
 		svc.Spec.ExternalTrafficPolicy = v1.ServiceExternalTrafficPolicyTypeCluster
@@ -1603,10 +1603,10 @@ var _ = SIGDescribe("Services", func() {
 	})
 
 	// TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
-	It("should be able to switch session affinity for LoadBalancer service with ESIPP off [Slow] [DisabledForLargeClusters]", func() {
+	SkippableIt("should be able to switch session affinity for LoadBalancer service with ESIPP off [Slow] [DisabledForLargeClusters]", func() {
 		// L4 load balancer affinity `ClientIP` is not supported on AWS ELB.
 		framework.SkipIfProviderIs("aws")
-
+	}, func() {
 		svc := getServeHostnameService("service")
 		svc.Spec.Type = v1.ServiceTypeLoadBalancer
 		svc.Spec.ExternalTrafficPolicy = v1.ServiceExternalTrafficPolicyTypeCluster

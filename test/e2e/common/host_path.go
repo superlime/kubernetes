@@ -117,9 +117,7 @@ var _ = Describe("[sig-storage] HostPath", func() {
 		})
 	})
 
-	It("should support existing directory subPath", func() {
-		framework.SkipUnlessSSHKeyPresent()
-
+	SkippableIt("should support existing directory subPath", func() {framework.SkipUnlessSSHKeyPresent()}, func() {
 		subPath := "sub-path"
 		fileName := "test-file"
 		retryDuration := 180
@@ -168,9 +166,7 @@ var _ = Describe("[sig-storage] HostPath", func() {
 	})
 
 	// TODO consolidate common code of this test and above
-	It("should support existing single file subPath", func() {
-		framework.SkipUnlessSSHKeyPresent()
-
+	SkippableIt("should support existing single file subPath", func() {framework.SkipUnlessSSHKeyPresent()}, func() {
 		subPath := "sub-path-test-file"
 		retryDuration := 180
 

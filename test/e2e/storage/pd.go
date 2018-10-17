@@ -124,12 +124,12 @@ var _ = utils.SIGDescribe("Pod Disks", func() {
 			readOnly := t.readOnly
 			readOnlyTxt := readOnlyMap[readOnly]
 
-			It(fmt.Sprintf("for %s PD with pod delete grace period of %q", readOnlyTxt, t.descr), func() {
+			SkippableIt(fmt.Sprintf("for %s PD with pod delete grace period of %q", readOnlyTxt, t.descr), func() {
 				framework.SkipUnlessProviderIs("gce", "gke", "aws")
 				if readOnly {
 					framework.SkipIfProviderIs("aws")
 				}
-
+			}, func() {
 				By("creating PD")
 				diskName, err := framework.CreatePDWithRetry()
 				framework.ExpectNoError(err, "Error creating PD")
@@ -240,8 +240,9 @@ var _ = utils.SIGDescribe("Pod Disks", func() {
 			numPDs := t.numPDs
 			numContainers := t.numContainers
 
-			It(fmt.Sprintf("using %d containers and %d PDs", numContainers, numPDs), func() {
+			SkippableIt(fmt.Sprintf("using %d containers and %d PDs", numContainers, numPDs), func() {
 				framework.SkipUnlessProviderIs("gce", "gke", "aws")
+			}, func() {
 				var host0Pod *v1.Pod
 				var err error
 				fileAndContentToVerify := make(map[string]string)
@@ -331,8 +332,9 @@ var _ = utils.SIGDescribe("Pod Disks", func() {
 
 		for _, t := range tests {
 			disruptOp := t.disruptOp
-			It(fmt.Sprintf("when %s", t.descr), func() {
+			SkippableIt(fmt.Sprintf("when %s", t.descr), func() {
 				framework.SkipUnlessProviderIs("gce")
+			}, func() {
 				origNodeCnt := len(nodes.Items) // healhy nodes running kublet
 
 				By("creating a pd")
@@ -432,9 +434,9 @@ var _ = utils.SIGDescribe("Pod Disks", func() {
 		}
 	})
 
-	It("should be able to delete a non-existent PD without error", func() {
+	SkippableIt("should be able to delete a non-existent PD without error", func() {
 		framework.SkipUnlessProviderIs("gce")
-
+	}, func() {
 		By("delete a PD")
 		framework.ExpectNoError(framework.DeletePDWithRetry("non-exist"))
 	})

@@ -73,10 +73,9 @@ var _ = SIGDescribe("Aggregator", func() {
 		aggrclient = f.AggregatorClient
 	})
 
-	It("Should be able to support the 1.7 Sample API Server using the current Aggregator", func() {
+	SkippableIt("Should be able to support the 1.7 Sample API Server using the current Aggregator", func() {framework.SkipUnlessProviderIs("gce", "gke")}, func() {
 		// Make sure the relevant provider supports Agggregator
 		framework.SkipUnlessServerVersionGTE(serverAggregatorVersion, f.ClientSet.Discovery())
-		framework.SkipUnlessProviderIs("gce", "gke")
 
 		// Testing a 1.7 version of the sample-apiserver
 		TestSampleAPIServer(f, imageutils.GetE2EImage(imageutils.APIServer))

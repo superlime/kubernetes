@@ -13,6 +13,7 @@ type BasicNode interface {
 type SubjectNode interface {
 	BasicNode
 
+	IsSkippable() bool
 	Text() string
 	Flag() types.FlagType
 	Samples() int

@@ -13,6 +13,7 @@ type runner struct {
 	isAsync          bool
 	asyncFunc        func(chan<- interface{})
 	syncFunc         func()
+	checkSkippable   func()
 	codeLocation     types.CodeLocation
 	timeoutThreshold time.Duration
 	nodeType         types.SpecComponentType
@@ -20,13 +21,14 @@ type runner struct {
 	failer           *failer.Failer
 }
 
-func newRunner(body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, nodeType types.SpecComponentType, componentIndex int) *runner {
+func newSkippableRunner(checkSkippable func(), body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, nodeType types.SpecComponentType, componentIndex int) *runner {
 	bodyType := reflect.TypeOf(body)
 	if bodyType.Kind() != reflect.Func {
 		panic(fmt.Sprintf("Expected a function but got something else at %v", codeLocation))
 	}
 
 	runner := &runner{
+		checkSkippable:   checkSkippable,
 		codeLocation:     codeLocation,
 		timeoutThreshold: timeout,
 		failer:           failer,
@@ -54,6 +56,26 @@ func newRunner(body interface{}, codeLocation types.CodeLocation, timeout time.D
 	}
 
 	panic(fmt.Sprintf("Too many arguments to function at %v", codeLocation))
+}
+
+func newRunner(body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, nodeType types.SpecComponentType, componentIndex int) *runner {
+	return newSkippableRunner(nil, body, codeLocation, timeout, failer, nodeType, componentIndex)
+}
+
+func (r *runner) IsSkippable() (skippable bool) {
+	skippable = false
+	if r.checkSkippable == nil {
+		return
+	}
+
+	defer func() {
+		if e := recover(); e != nil {
+			skippable = true
+		}
+	}()
+
+	r.checkSkippable()
+	return
 }
 
 func (r *runner) run() (outcome types.SpecState, failure types.SpecFailure) {

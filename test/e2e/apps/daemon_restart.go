@@ -245,10 +245,8 @@ var _ = SIGDescribe("DaemonRestart [Disruptive]", func() {
 		close(stopCh)
 	})
 
-	It("Controller Manager should not create/delete replicas across restart", func() {
-
-		// Requires master ssh access.
-		framework.SkipUnlessProviderIs("gce", "aws")
+	// Requires master ssh access.
+	SkippableIt("Controller Manager should not create/delete replicas across restart", func() {framework.SkipUnlessProviderIs("gce", "aws")}, func() {
 		restarter := NewRestartConfig(
 			framework.GetMasterHost(), "kube-controller", ports.InsecureKubeControllerManagerPort, restartPollInterval, restartTimeout)
 		restarter.restart()
@@ -276,10 +274,8 @@ var _ = SIGDescribe("DaemonRestart [Disruptive]", func() {
 		}
 	})
 
-	It("Scheduler should continue assigning pods to nodes across restart", func() {
-
-		// Requires master ssh access.
-		framework.SkipUnlessProviderIs("gce", "aws")
+	// Requires master ssh access.
+	SkippableIt("Scheduler should continue assigning pods to nodes across restart", func() {framework.SkipUnlessProviderIs("gce", "aws")}, func() {
 		restarter := NewRestartConfig(
 			framework.GetMasterHost(), "kube-scheduler", ports.SchedulerPort, restartPollInterval, restartTimeout)
 

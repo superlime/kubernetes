@@ -235,13 +235,12 @@ var _ = SIGDescribe("Addon update", func() {
 	})
 
 	// WARNING: the test is not parallel-friendly!
-	It("should propagate add-on file changes [Slow]", func() {
+	SkippableIt("should propagate add-on file changes [Slow]", func() {framework.SkipUnlessProviderIs("gce")}, func() {
 		// This test requires:
 		// - SSH
 		// - master access
 		// ... so the provider check should be identical to the intersection of
 		// providers that provide those capabilities.
-		framework.SkipUnlessProviderIs("gce")
 
 		//these tests are long, so I squeezed several cases in one scenario
 		Expect(sshClient).NotTo(BeNil())

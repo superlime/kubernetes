@@ -13,12 +13,16 @@ type ItNode struct {
 	text string
 }
 
-func NewItNode(text string, body interface{}, flag types.FlagType, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, componentIndex int) *ItNode {
+func NewItNode(text string, checkSkippable func(), body interface{}, flag types.FlagType, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, componentIndex int) *ItNode {
 	return &ItNode{
-		runner: newRunner(body, codeLocation, timeout, failer, types.SpecComponentTypeIt, componentIndex),
+		runner: newSkippableRunner(checkSkippable, body, codeLocation, timeout, failer, types.SpecComponentTypeIt, componentIndex),
 		flag:   flag,
 		text:   text,
 	}
+}
+
+func (node *ItNode) IsSkippable() bool {
+	return node.runner.IsSkippable()
 }
 
 func (node *ItNode) Run() (outcome types.SpecState, failure types.SpecFailure) {

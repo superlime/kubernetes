@@ -207,8 +207,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 
 	gpuType := os.Getenv("TESTED_GPU_TYPE")
 
-	It(fmt.Sprintf("Should scale up GPU pool from 0 [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {
-		framework.SkipUnlessProviderIs("gke")
+	SkippableIt(fmt.Sprintf("Should scale up GPU pool from 0 [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		if gpuType == "" {
 			framework.Failf("TEST_GPU_TYPE not defined")
 			return
@@ -234,8 +233,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 		Expect(len(getPoolNodes(f, gpuPoolName))).Should(Equal(1))
 	})
 
-	It(fmt.Sprintf("Should scale up GPU pool from 1 [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {
-		framework.SkipUnlessProviderIs("gke")
+	SkippableIt(fmt.Sprintf("Should scale up GPU pool from 1 [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		if gpuType == "" {
 			framework.Failf("TEST_GPU_TYPE not defined")
 			return
@@ -264,8 +262,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 		Expect(len(getPoolNodes(f, gpuPoolName))).Should(Equal(2))
 	})
 
-	It(fmt.Sprintf("Should not scale GPU pool up if pod does not require GPUs [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {
-		framework.SkipUnlessProviderIs("gke")
+	SkippableIt(fmt.Sprintf("Should not scale GPU pool up if pod does not require GPUs [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		if gpuType == "" {
 			framework.Failf("TEST_GPU_TYPE not defined")
 			return
@@ -293,8 +290,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 		Expect(len(getPoolNodes(f, gpuPoolName))).Should(Equal(0))
 	})
 
-	It(fmt.Sprintf("Should scale down GPU pool from 1 [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {
-		framework.SkipUnlessProviderIs("gke")
+	SkippableIt(fmt.Sprintf("Should scale down GPU pool from 1 [GpuType:%s] [Feature:ClusterSizeAutoscalingGpu]", gpuType), func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		if gpuType == "" {
 			framework.Failf("TEST_GPU_TYPE not defined")
 			return
@@ -360,9 +356,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 		Expect(len(framework.GetReadySchedulableNodesOrDie(f.ClientSet).Items)).Should(Equal(status.target + unmanagedNodes))
 	})
 
-	It("should increase cluster size if pending pods are small and there is another node pool that is not autoscaled [Feature:ClusterSizeAutoscalingScaleUp]", func() {
-		framework.SkipUnlessProviderIs("gke")
-
+	SkippableIt("should increase cluster size if pending pods are small and there is another node pool that is not autoscaled [Feature:ClusterSizeAutoscalingScaleUp]", func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		By("Creating new node-pool with n1-standard-4 machines")
 		const extraPoolName = "extra-pool"
 		addNodePool(extraPoolName, "n1-standard-4", 1)
@@ -394,9 +388,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 		framework.ExpectNoError(waitForAllCaPodsReadyInNamespace(f, c))
 	})
 
-	It("should disable node pool autoscaling [Feature:ClusterSizeAutoscalingScaleUp]", func() {
-		framework.SkipUnlessProviderIs("gke")
-
+	SkippableIt("should disable node pool autoscaling [Feature:ClusterSizeAutoscalingScaleUp]", func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		By("Creating new node-pool with n1-standard-4 machines")
 		const extraPoolName = "extra-pool"
 		addNodePool(extraPoolName, "n1-standard-4", 1)
@@ -628,9 +620,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 		framework.ExpectNoError(framework.DeleteRCAndWaitForGC(f.ClientSet, f.Namespace.Name, "node-selector"))
 	})
 
-	It("should scale up correct target pool [Feature:ClusterSizeAutoscalingScaleUp]", func() {
-		framework.SkipUnlessProviderIs("gke")
-
+	SkippableIt("should scale up correct target pool [Feature:ClusterSizeAutoscalingScaleUp]", func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		By("Creating new node-pool with n1-standard-4 machines")
 		const extraPoolName = "extra-pool"
 		addNodePool(extraPoolName, "n1-standard-4", 1)
@@ -682,9 +672,7 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 			framework.TestUnderTemporaryNetworkFailure(c, "default", getAnyNode(c), func() { simpleScaleDownTest(1) })
 		})
 
-	It("should correctly scale down after a node is not needed when there is non autoscaled pool[Feature:ClusterSizeAutoscalingScaleDown]", func() {
-		framework.SkipUnlessProviderIs("gke")
-
+	SkippableIt("should correctly scale down after a node is not needed when there is non autoscaled pool[Feature:ClusterSizeAutoscalingScaleDown]", func() {framework.SkipUnlessProviderIs("gke")}, func() {
 		increasedSize := manuallyIncreaseClusterSize(f, originalSizes)
 
 		const extraPoolName = "extra-pool"

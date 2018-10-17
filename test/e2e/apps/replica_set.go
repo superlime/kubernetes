@@ -91,9 +91,8 @@ var _ = SIGDescribe("ReplicaSet", func() {
 		testReplicaSetServeImageOrFail(f, "basic", framework.ServeHostnameImage)
 	})
 
-	It("should serve a basic image on each replica with a private image", func() {
-		// requires private images
-		framework.SkipUnlessProviderIs("gce", "gke")
+	// requires private images
+	SkippableIt("should serve a basic image on each replica with a private image", func() {framework.SkipUnlessProviderIs("gce", "gke")}, func() {
 		privateimage := imageutils.ServeHostname
 		privateimage.SetRegistry(imageutils.PrivateRegistry)
 		testReplicaSetServeImageOrFail(f, "private", imageutils.GetE2EImage(privateimage))

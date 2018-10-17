@@ -137,6 +137,11 @@ func (spec *Spec) runSample(sample int, writer io.Writer) {
 	spec.failure = types.SpecFailure{}
 	innerMostContainerIndexToUnwind := -1
 
+	if spec.subject.IsSkippable() {
+		spec.Skip()
+		return
+	}
+
 	defer func() {
 		for i := innerMostContainerIndexToUnwind; i >= 0; i-- {
 			container := spec.containers[i]

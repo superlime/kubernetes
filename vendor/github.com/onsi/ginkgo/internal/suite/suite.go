@@ -151,7 +151,14 @@ func (suite *Suite) PushItNode(text string, body interface{}, flag types.FlagTyp
 	if suite.running {
 		suite.failer.Fail("You may only call It from within a Describe or Context", codeLocation)
 	}
-	suite.currentContainer.PushSubjectNode(leafnodes.NewItNode(text, body, flag, codeLocation, timeout, suite.failer, suite.containerIndex))
+	suite.currentContainer.PushSubjectNode(leafnodes.NewItNode(text, nil, body, flag, codeLocation, timeout, suite.failer, suite.containerIndex))
+}
+
+func (suite *Suite) PushSkippableItNode(text string, checkSkippable func(), body interface{}, flag types.FlagType, codeLocation types.CodeLocation, timeout time.Duration) {
+	if suite.running {
+		suite.failer.Fail("You may only call It from within a Describe or Context", codeLocation)
+	}
+	suite.currentContainer.PushSubjectNode(leafnodes.NewItNode(text, checkSkippable, body, flag, codeLocation, timeout, suite.failer, suite.containerIndex))
 }
 
 func (suite *Suite) PushMeasureNode(text string, body interface{}, flag types.FlagType, codeLocation types.CodeLocation, samples int) {

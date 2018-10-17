@@ -144,10 +144,11 @@ var _ = SIGDescribe("DisruptionController", func() {
 		if c.shouldDeny {
 			expectation = "should not allow an eviction"
 		}
-		It(fmt.Sprintf("evictions: %s => %s", c.description, expectation), func() {
+		SkippableIt(fmt.Sprintf("evictions: %s => %s", c.description, expectation), func() {
 			if c.skipForBigClusters {
 				framework.SkipUnlessNodeCountIsAtMost(bigClusterSize - 1)
 			}
+		}, func() {
 			createPodsOrDie(cs, ns, c.podCount)
 			if c.replicaSetSize > 0 {
 				createReplicaSetOrDie(cs, ns, c.replicaSetSize, c.exclusive)

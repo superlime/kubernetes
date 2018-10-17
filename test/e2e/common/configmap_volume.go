@@ -47,7 +47,7 @@ var _ = Describe("[sig-storage] ConfigMap", func() {
 		Testname: ConfigMap Volume, without mapping, volume mode set
 		Description: Create a ConfigMap, create a Pod that mounts a volume and populates the volume with data stored in the ConfigMap. File mode is changed to a custom value of '0x400'. The ConfigMap that is created MUST be accessible to read from the newly created Pod using the volume mount. The data content of the file MUST be readable and verified and file modes MUST be set to the custom value of ‘0x400’
 	*/
-	framework.ConformanceIt("should be consumable from pods in volume with defaultMode set [NodeConformance]", func() {
+	SkippableIt("should be consumable from pods in volume with defaultMode set [NodeConformance]", framework.SkipIfNodeOSDistroIsWindows, func() {
 		defaultMode := int32(0400)
 		doConfigMapE2EWithoutMappings(f, 0, 0, &defaultMode)
 	})

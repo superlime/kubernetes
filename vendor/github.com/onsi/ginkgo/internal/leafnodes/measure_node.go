@@ -32,6 +32,10 @@ func NewMeasureNode(text string, body interface{}, flag types.FlagType, codeLoca
 	}
 }
 
+func (node *MeasureNode) IsSkippable() bool {
+	return false
+}
+
 func (node *MeasureNode) Run() (outcome types.SpecState, failure types.SpecFailure) {
 	return node.runner.run()
 }

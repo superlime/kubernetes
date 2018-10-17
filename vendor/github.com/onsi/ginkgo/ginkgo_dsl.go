@@ -358,6 +358,13 @@ func XIt(text string, _ ...interface{}) bool {
 	return true
 }
 
+//Ginkgo will normally run It blocks synchronously.  To perform asynchronous tests, pass a
+//function that accepts a Done channel.  When you do this, you can also provide an optional timeout.
+func SkippableIt(text string, checkSkippable func(), body interface{}, timeout ...float64) bool {
+	globalSuite.PushSkippableItNode(text, checkSkippable, body, types.FlagTypeNone, codelocation.New(1), parseTimeout(timeout...))
+	return true
+}
+
 //Specify blocks are aliases for It blocks and allow for more natural wording in situations
 //which "It" does not fit into a natural sentence flow. All the same protocols apply for Specify blocks
 //which apply to It blocks.
