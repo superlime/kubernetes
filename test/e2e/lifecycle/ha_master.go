@@ -111,6 +111,10 @@ func removeZoneFromZones(zones []string, zone string) []string {
 }
 
 var _ = SIGDescribe("HA-master [Feature:HAMaster]", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce")
+	}
+
 	f := framework.NewDefaultFramework("ha-master")
 	var c clientset.Interface
 	var ns string
@@ -119,7 +123,6 @@ var _ = SIGDescribe("HA-master [Feature:HAMaster]", func() {
 	var existingRCs []string
 
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce")
 		c = f.ClientSet
 		ns = f.Namespace.Name
 		framework.ExpectNoError(framework.WaitForMasters(framework.TestContext.CloudConfig.MasterName, c, 1, 10*time.Minute))

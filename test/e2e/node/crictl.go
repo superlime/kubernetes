@@ -26,14 +26,14 @@ import (
 )
 
 var _ = SIGDescribe("crictl", func() {
-	f := framework.NewDefaultFramework("crictl")
-
 	BeforeEach(func() {
 		// `crictl` is not available on all cloud providers.
 		framework.SkipUnlessProviderIs("gce", "gke")
 		// The test requires $HOME/.ssh/id_rsa key to be present.
 		framework.SkipUnlessSSHKeyPresent()
 	})
+
+	f := framework.NewDefaultFramework("crictl")
 
 	It("should be able to run crictl on the node", func() {
 		// Get all nodes' external IPs.

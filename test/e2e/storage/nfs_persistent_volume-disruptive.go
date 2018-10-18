@@ -42,6 +42,11 @@ const (
 )
 
 var _ = utils.SIGDescribe("NFSPersistentVolumes[Disruptive][Flaky]", func() {
+	BeforeEach(func() {
+		// To protect the NFS volume pod from the kubelet restart, we isolate it on its own node.
+		framework.SkipUnlessNodeCountIsAtLeast(MinNodes)
+		framework.SkipIfProviderIs("local")
+	}
 
 	f := framework.NewDefaultFramework("disruptive-pv")
 	var (
@@ -57,10 +62,6 @@ var _ = utils.SIGDescribe("NFSPersistentVolumes[Disruptive][Flaky]", func() {
 	)
 
 	BeforeEach(func() {
-		// To protect the NFS volume pod from the kubelet restart, we isolate it on its own node.
-		framework.SkipUnlessNodeCountIsAtLeast(MinNodes)
-		framework.SkipIfProviderIs("local")
-
 		c = f.ClientSet
 		ns = f.Namespace.Name
 		volLabel = labels.Set{framework.VolumeSelectorKey: ns}

@@ -179,6 +179,10 @@ func getContainerRestarts(c clientset.Interface, ns string, labelSelector labels
 }
 
 var _ = SIGDescribe("DaemonRestart [Disruptive]", func() {
+	BeforeEach(func() {
+		// These tests require SSH
+		framework.SkipUnlessProviderIs(framework.ProvidersWithSSH...)
+	}
 
 	f := framework.NewDefaultFramework("daemonrestart")
 	rcName := "daemonrestart" + strconv.Itoa(numPods) + "-" + string(uuid.NewUUID())
@@ -192,8 +196,6 @@ var _ = SIGDescribe("DaemonRestart [Disruptive]", func() {
 	var tracker *podTracker
 
 	BeforeEach(func() {
-		// These tests require SSH
-		framework.SkipUnlessProviderIs(framework.ProvidersWithSSH...)
 		ns = f.Namespace.Name
 
 		// All the restart tests need an rc and a watch on pods of the rc.

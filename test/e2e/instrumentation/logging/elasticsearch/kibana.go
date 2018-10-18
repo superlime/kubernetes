@@ -31,14 +31,14 @@ import (
 )
 
 var _ = instrumentation.SIGDescribe("Kibana Logging Instances Is Alive [Feature:Elasticsearch]", func() {
-	f := framework.NewDefaultFramework("kibana-logging")
-
 	ginkgo.BeforeEach(func() {
 		// TODO: For now assume we are only testing cluster logging with Elasticsearch
 		// and Kibana on GCE. Once we are sure that Elasticsearch and Kibana cluster level logging
 		// works for other providers we should widen this scope of this test.
 		framework.SkipUnlessProviderIs("gce")
 	})
+
+	f := framework.NewDefaultFramework("kibana-logging")
 
 	ginkgo.It("should check that the Kibana logging instance is alive", func() {
 		ClusterLevelLoggingWithKibana(f)

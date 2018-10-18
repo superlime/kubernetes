@@ -68,6 +68,10 @@ var _ = utils.SIGDescribe("PersistentVolumes GCEPD", func() {
 		node      types.NodeName
 	)
 
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("pv")
 	BeforeEach(func() {
 		c = f.ClientSet
@@ -77,7 +81,6 @@ var _ = utils.SIGDescribe("PersistentVolumes GCEPD", func() {
 		volLabel = labels.Set{framework.VolumeSelectorKey: ns}
 		selector = metav1.SetAsLabelSelector(volLabel)
 
-		framework.SkipUnlessProviderIs("gce", "gke")
 		By("Initializing Test Spec")
 		diskName, err = framework.CreatePDWithRetry()
 		Expect(err).NotTo(HaveOccurred())

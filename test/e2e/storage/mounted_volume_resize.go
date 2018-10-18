@@ -48,9 +48,12 @@ var _ = utils.SIGDescribe("Mounted volume expand[Slow]", func() {
 		nodeKey           string
 	)
 
-	f := framework.NewDefaultFramework("mounted-volume-expand")
 	BeforeEach(func() {
 		framework.SkipUnlessProviderIs("aws", "gce")
+	}
+
+	f := framework.NewDefaultFramework("mounted-volume-expand")
+	BeforeEach(func() {
 		c = f.ClientSet
 		ns = f.Namespace.Name
 		framework.ExpectNoError(framework.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))

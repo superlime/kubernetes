@@ -88,6 +88,10 @@ const (
 )
 
 var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("autoscaling")
 	var c clientset.Interface
 	var nodeCount int
@@ -97,7 +101,6 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 
 	BeforeEach(func() {
 		c = f.ClientSet
-		framework.SkipUnlessProviderIs("gce", "gke")
 
 		originalSizes = make(map[string]int)
 		sum := 0
@@ -136,7 +139,6 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 	})
 
 	AfterEach(func() {
-		framework.SkipUnlessProviderIs("gce", "gke")
 		By(fmt.Sprintf("Restoring initial size of the cluster"))
 		setMigSizes(originalSizes)
 		expectedNodes := 0
@@ -449,8 +451,6 @@ var _ = SIGDescribe("Cluster size autoscaling [Slow]", func() {
 	})
 
 	It("should increase cluster size if pod requesting volume is pending [Feature:ClusterSizeAutoscalingScaleUp]", func() {
-		framework.SkipUnlessProviderIs("gce", "gke")
-
 		volumeLabels := labels.Set{
 			framework.VolumeSelectorKey: f.Namespace.Name,
 		}

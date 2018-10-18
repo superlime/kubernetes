@@ -192,6 +192,13 @@ func getHostFromHostPort(hostPort string) string {
 }
 
 var _ = utils.SIGDescribe("Flexvolumes", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "local")
+		framework.SkipUnlessMasterOSDistroIs("debian", "ubuntu", "gci", "custom")
+		framework.SkipUnlessNodeOSDistroIs("debian", "ubuntu", "gci", "custom")
+		framework.SkipUnlessSSHKeyPresent()
+	}
+
 	f := framework.NewDefaultFramework("flexvolume")
 
 	// note that namespace deletion is handled by delete-namespace flag
@@ -203,11 +210,6 @@ var _ = utils.SIGDescribe("Flexvolumes", func() {
 	var suffix string
 
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce", "local")
-		framework.SkipUnlessMasterOSDistroIs("debian", "ubuntu", "gci", "custom")
-		framework.SkipUnlessNodeOSDistroIs("debian", "ubuntu", "gci", "custom")
-		framework.SkipUnlessSSHKeyPresent()
-
 		cs = f.ClientSet
 		ns = f.Namespace
 		nodes := framework.GetReadySchedulableNodesOrDie(f.ClientSet)

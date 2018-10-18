@@ -36,11 +36,11 @@ const (
 )
 
 var _ = instrumentation.SIGDescribe("Cluster level logging implemented by Stackdriver", func() {
-	f := framework.NewDefaultFramework("sd-logging")
-
 	ginkgo.BeforeEach(func() {
 		framework.SkipUnlessProviderIs("gce", "gke")
 	})
+
+	f := framework.NewDefaultFramework("sd-logging")
 
 	ginkgo.It("should ingest logs [Feature:StackdriverLogging]", func() {
 		withLogProviderForScope(f, podsScope, func(p *sdLogProvider) {

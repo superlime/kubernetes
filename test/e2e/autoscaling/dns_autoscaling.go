@@ -42,6 +42,10 @@ const (
 )
 
 var _ = SIGDescribe("DNS horizontal autoscaling", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("dns-autoscaling")
 	var c clientset.Interface
 	var previousParams map[string]string
@@ -51,7 +55,6 @@ var _ = SIGDescribe("DNS horizontal autoscaling", func() {
 	var DNSParams_3 DNSParamsLinear
 
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce", "gke")
 		c = f.ClientSet
 
 		nodeCount := len(framework.GetReadySchedulableNodesOrDie(c).Items)

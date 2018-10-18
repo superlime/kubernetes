@@ -33,12 +33,15 @@ import (
 )
 
 var _ = SIGDescribe("Multi-AZ Cluster Volumes [sig-storage]", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("multi-az")
 	var zoneCount int
 	var err error
 	image := framework.ServeHostnameImage
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce", "gke")
 		if zoneCount <= 0 {
 			zoneCount, err = getZoneCount(f.ClientSet)
 			Expect(err).NotTo(HaveOccurred())

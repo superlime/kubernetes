@@ -84,6 +84,12 @@ var serverWebhookVersion = utilversion.MustParseSemantic("v1.8.0")
 
 var _ = SIGDescribe("AdmissionWebhook", func() {
 	var context *certContext
+
+	BeforeEach(func() {
+		// Make sure the relevant provider supports admission webhook
+		framework.SkipUnlessProviderIs("gce", "gke", "local")
+	}
+
 	f := framework.NewDefaultFramework("webhook")
 
 	var client clientset.Interface
@@ -93,9 +99,7 @@ var _ = SIGDescribe("AdmissionWebhook", func() {
 		client = f.ClientSet
 		namespaceName = f.Namespace.Name
 
-		// Make sure the relevant provider supports admission webhook
 		framework.SkipUnlessServerVersionGTE(serverWebhookVersion, f.ClientSet.Discovery())
-		framework.SkipUnlessProviderIs("gce", "gke", "local")
 
 		_, err := f.ClientSet.AdmissionregistrationV1beta1().ValidatingWebhookConfigurations().List(metav1.ListOptions{})
 		if errors.IsNotFound(err) {

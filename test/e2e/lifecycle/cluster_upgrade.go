@@ -355,11 +355,11 @@ var _ = Describe("[sig-apps] stateful Upgrade [Feature:StatefulUpgrade]", func()
 })
 
 var _ = SIGDescribe("kube-proxy migration [Feature:KubeProxyDaemonSetMigration]", func() {
-	f := framework.NewDefaultFramework("kube-proxy-ds-migration")
-
 	BeforeEach(func() {
 		framework.SkipUnlessProviderIs("gce")
 	})
+
+	f := framework.NewDefaultFramework("kube-proxy-ds-migration")
 
 	Describe("Upgrade kube-proxy from static pods to a DaemonSet", func() {
 		testFrameworks := createUpgradeFrameworks(kubeProxyUpgradeTests)

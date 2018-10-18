@@ -60,6 +60,10 @@ type scaleUpTestConfig struct {
 }
 
 var _ = framework.KubeDescribe("Cluster size autoscaler scalability [Slow]", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke", "kubemark")
+	}
+
 	f := framework.NewDefaultFramework("autoscaling")
 	var c clientset.Interface
 	var nodeCount int
@@ -69,8 +73,6 @@ var _ = framework.KubeDescribe("Cluster size autoscaler scalability [Slow]", fun
 	var sum int
 
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce", "gke", "kubemark")
-
 		// Check if Cloud Autoscaler is enabled by trying to get its ConfigMap.
 		_, err := f.ClientSet.CoreV1().ConfigMaps("kube-system").Get("cluster-autoscaler-status", metav1.GetOptions{})
 		if err != nil {

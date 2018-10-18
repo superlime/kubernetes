@@ -33,6 +33,10 @@ import (
 )
 
 var _ = SIGDescribe("Firewall rule", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce")
+	}
+
 	var firewall_test_name = "firewall-test"
 	f := framework.NewDefaultFramework(firewall_test_name)
 
@@ -41,7 +45,6 @@ var _ = SIGDescribe("Firewall rule", func() {
 	var gceCloud *gcecloud.GCECloud
 
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce")
 		cs = f.ClientSet
 		cloudConfig = framework.TestContext.CloudConfig
 		gceCloud = cloudConfig.Provider.(*gcecloud.GCECloud)

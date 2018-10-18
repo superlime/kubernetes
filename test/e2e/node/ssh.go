@@ -28,9 +28,6 @@ import (
 const maxNodes = 100
 
 var _ = SIGDescribe("SSH", func() {
-
-	f := framework.NewDefaultFramework("ssh")
-
 	BeforeEach(func() {
 		// When adding more providers here, also implement their functionality in util.go's framework.GetSigner(...).
 		framework.SkipUnlessProviderIs(framework.ProvidersWithSSH...)
@@ -39,6 +36,8 @@ var _ = SIGDescribe("SSH", func() {
 		// we should skip if the environment does not have the key (not all CI systems support this use case)
 		framework.SkipUnlessSSHKeyPresent()
 	})
+
+	f := framework.NewDefaultFramework("ssh")
 
 	It("should SSH to all nodes and run commands", func() {
 		// Get all nodes' external IPs.

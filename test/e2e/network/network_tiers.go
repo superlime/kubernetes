@@ -36,14 +36,17 @@ import (
 )
 
 var _ = SIGDescribe("Services [Feature:GCEAlphaFeature][Slow]", func() {
+	BeforeEach(func() {
+		// This test suite requires the GCE environment.
+		framework.SkipUnlessProviderIs("gce")
+	}
+
 	f := framework.NewDefaultFramework("services")
 
 	var cs clientset.Interface
 	serviceLBNames := []string{}
 
 	BeforeEach(func() {
-		// This test suite requires the GCE environment.
-		framework.SkipUnlessProviderIs("gce")
 		cs = f.ClientSet
 	})
 

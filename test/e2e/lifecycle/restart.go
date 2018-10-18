@@ -65,6 +65,12 @@ func nodeNames(nodes []v1.Node) []string {
 }
 
 var _ = SIGDescribe("Restart [Disruptive]", func() {
+	BeforeEach(func() {
+		// This test requires the ability to restart all nodes, so the provider
+		// check must be identical to that call.
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("restart")
 	var ps *testutils.PodStore
 	var originalNodes []v1.Node
@@ -73,9 +79,6 @@ var _ = SIGDescribe("Restart [Disruptive]", func() {
 	var systemNamespace string
 
 	BeforeEach(func() {
-		// This test requires the ability to restart all nodes, so the provider
-		// check must be identical to that call.
-		framework.SkipUnlessProviderIs("gce", "gke")
 		var err error
 		ps, err = testutils.NewPodStore(f.ClientSet, metav1.NamespaceSystem, labels.Everything(), fields.Everything())
 		Expect(err).NotTo(HaveOccurred())

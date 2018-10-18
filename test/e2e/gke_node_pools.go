@@ -26,12 +26,11 @@ import (
 )
 
 var _ = framework.KubeDescribe("GKE node pools [Feature:GKENodePool]", func() {
-
-	f := framework.NewDefaultFramework("node-pools")
-
 	BeforeEach(func() {
 		framework.SkipUnlessProviderIs("gke")
 	})
+
+	f := framework.NewDefaultFramework("node-pools")
 
 	It("should create a cluster with multiple node pools [Feature:GKENodePool]", func() {
 		framework.Logf("Start create node pool test")

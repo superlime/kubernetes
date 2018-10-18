@@ -47,6 +47,10 @@ const (
 )
 
 var _ = utils.SIGDescribe("Regional PD", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("regional-pd")
 
 	// filled in BeforeEach
@@ -57,7 +61,6 @@ var _ = utils.SIGDescribe("Regional PD", func() {
 		c = f.ClientSet
 		ns = f.Namespace.Name
 
-		framework.SkipUnlessProviderIs("gce", "gke")
 		framework.SkipUnlessMultizone(c)
 	})
 

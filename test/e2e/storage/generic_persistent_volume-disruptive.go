@@ -27,6 +27,12 @@ import (
 )
 
 var _ = utils.SIGDescribe("GenericPersistentVolume[Disruptive]", func() {
+	BeforeEach(func() {
+		// Skip tests unless number of nodes is 2
+		framework.SkipUnlessNodeCountIsAtLeast(2)
+		framework.SkipIfProviderIs("local")
+	}
+
 	f := framework.NewDefaultFramework("generic-disruptive-pv")
 	var (
 		c  clientset.Interface
@@ -34,9 +40,6 @@ var _ = utils.SIGDescribe("GenericPersistentVolume[Disruptive]", func() {
 	)
 
 	BeforeEach(func() {
-		// Skip tests unless number of nodes is 2
-		framework.SkipUnlessNodeCountIsAtLeast(2)
-		framework.SkipIfProviderIs("local")
 		c = f.ClientSet
 		ns = f.Namespace.Name
 	})

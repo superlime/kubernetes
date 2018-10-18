@@ -28,10 +28,13 @@ import (
 )
 
 var _ = SIGDescribe("Metadata Concealment", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce")
+	}
+
 	f := framework.NewDefaultFramework("metadata-concealment")
 
 	It("should run a check-metadata-concealment job to completion", func() {
-		framework.SkipUnlessProviderIs("gce")
 		By("Creating a job")
 		job := &batch.Job{
 			ObjectMeta: metav1.ObjectMeta{

@@ -29,12 +29,11 @@ import (
 )
 
 var _ = framework.KubeDescribe("GKE local SSD [Feature:GKELocalSSD]", func() {
-
-	f := framework.NewDefaultFramework("localssd")
-
 	BeforeEach(func() {
 		framework.SkipUnlessProviderIs("gke")
 	})
+
+	f := framework.NewDefaultFramework("localssd")
 
 	It("should write and read from node local SSD [Feature:GKELocalSSD]", func() {
 		framework.Logf("Start local SSD test")

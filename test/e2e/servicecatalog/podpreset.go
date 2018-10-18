@@ -36,13 +36,16 @@ import (
 )
 
 var _ = SIGDescribe("[Feature:PodPreset] PodPreset", func() {
-	f := framework.NewDefaultFramework("podpreset")
-
-	var podClient *framework.PodClient
 	BeforeEach(func() {
 		// only run on gce for the time being til we find an easier way to update
 		// the admission controllers used on the others
 		framework.SkipUnlessProviderIs("gce")
+	}
+
+	f := framework.NewDefaultFramework("podpreset")
+
+	var podClient *framework.PodClient
+	BeforeEach(func() {
 		podClient = f.PodClient()
 	})
 

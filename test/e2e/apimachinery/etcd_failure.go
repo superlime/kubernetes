@@ -33,6 +33,11 @@ import (
 )
 
 var _ = SIGDescribe("Etcd failure [Disruptive]", func() {
+	// NOTE: BeforeEaches are taken in order, meaning that the skip check is
+	// executed before any other clients / namespaces are initialized.
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce")
+	}
 
 	f := framework.NewDefaultFramework("etcd-failure")
 
@@ -42,8 +47,6 @@ var _ = SIGDescribe("Etcd failure [Disruptive]", func() {
 		// - master access
 		// ... so the provider check should be identical to the intersection of
 		// providers that provide those capabilities.
-		framework.SkipUnlessProviderIs("gce")
-
 		Expect(framework.RunRC(testutils.RCConfig{
 			Client:    f.ClientSet,
 			Name:      "baz",

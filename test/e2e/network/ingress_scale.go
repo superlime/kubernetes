@@ -28,6 +28,11 @@ var _ = SIGDescribe("Loadbalancing: L7 Scalability", func() {
 	var (
 		ns string
 	)
+
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("ingress-scale")
 
 	BeforeEach(func() {
@@ -40,8 +45,6 @@ var _ = SIGDescribe("Loadbalancing: L7 Scalability", func() {
 		)
 
 		BeforeEach(func() {
-			framework.SkipUnlessProviderIs("gce", "gke")
-
 			scaleFramework = scale.NewIngressScaleFramework(f.ClientSet, ns, framework.TestContext.CloudConfig)
 			if err := scaleFramework.PrepareScaleTest(); err != nil {
 				framework.Failf("Unexpected error while preraring ingress scale test: %v", err)

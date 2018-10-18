@@ -48,9 +48,12 @@ var _ = utils.SIGDescribe("Volume expand [Slow]", func() {
 		resizableSc *storage.StorageClass
 	)
 
-	f := framework.NewDefaultFramework("volume-expand")
 	BeforeEach(func() {
 		framework.SkipUnlessProviderIs("aws", "gce")
+	}
+
+	f := framework.NewDefaultFramework("volume-expand")
+	BeforeEach(func() {
 		c = f.ClientSet
 		ns = f.Namespace.Name
 		framework.ExpectNoError(framework.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))

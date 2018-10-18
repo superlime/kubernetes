@@ -27,14 +27,14 @@ import (
 )
 
 var _ = instrumentation.SIGDescribe("Cluster level logging using Elasticsearch [Feature:Elasticsearch]", func() {
-	f := framework.NewDefaultFramework("es-logging")
-
 	ginkgo.BeforeEach(func() {
 		// TODO: For now assume we are only testing cluster logging with Elasticsearch
 		// on GCE. Once we are sure that Elasticsearch cluster level logging
 		// works for other providers we should widen this scope of this test.
 		framework.SkipUnlessProviderIs("gce")
 	})
+
+	f := framework.NewDefaultFramework("es-logging")
 
 	ginkgo.It("should check that logs from containers are ingested into Elasticsearch", func() {
 		ingestionInterval := 10 * time.Second

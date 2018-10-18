@@ -35,12 +35,15 @@ import (
 )
 
 var _ = SIGDescribe("Multi-AZ Clusters", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessProviderIs("gce", "gke", "aws")
+	}
+
 	f := framework.NewDefaultFramework("multi-az")
 	var zoneCount int
 	var err error
 	image := framework.ServeHostnameImage
 	BeforeEach(func() {
-		framework.SkipUnlessProviderIs("gce", "gke", "aws")
 		if zoneCount <= 0 {
 			zoneCount, err = getZoneCount(f.ClientSet)
 			Expect(err).NotTo(HaveOccurred())

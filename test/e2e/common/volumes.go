@@ -54,6 +54,10 @@ import (
 // These tests need privileged containers, which are disabled by default.  Run
 // the test with "go run hack/e2e.go ... --ginkgo.focus=[Feature:Volumes]"
 var _ = Describe("[sig-storage] GCP Volumes", func() {
+	BeforeEach(func() {
+		framework.SkipUnlessNodeOSDistroIs("gci", "ubuntu", "custom")
+	}
+
 	f := framework.NewDefaultFramework("gcp-volume")
 
 	// note that namespace deletion is handled by delete-namespace flag
@@ -62,8 +66,6 @@ var _ = Describe("[sig-storage] GCP Volumes", func() {
 	var c clientset.Interface
 
 	BeforeEach(func() {
-		framework.SkipUnlessNodeOSDistroIs("gci", "ubuntu", "custom")
-
 		namespace = f.Namespace
 		c = f.ClientSet
 	})

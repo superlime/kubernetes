@@ -1616,6 +1616,11 @@ var _ = SIGDescribe("Services", func() {
 
 // TODO: Get rid of [DisabledForLargeClusters] tag when issue #56138 is fixed.
 var _ = SIGDescribe("ESIPP [Slow] [DisabledForLargeClusters]", func() {
+	BeforeEach(func() {
+		// requires cloud load-balancer support - this feature currently supported only on GCE/GKE
+		framework.SkipUnlessProviderIs("gce", "gke")
+	}
+
 	f := framework.NewDefaultFramework("esipp")
 	loadBalancerCreateTimeout := framework.LoadBalancerCreateTimeoutDefault
 
@@ -1623,9 +1628,6 @@ var _ = SIGDescribe("ESIPP [Slow] [DisabledForLargeClusters]", func() {
 	serviceLBNames := []string{}
 
 	BeforeEach(func() {
-		// requires cloud load-balancer support - this feature currently supported only on GCE/GKE
-		framework.SkipUnlessProviderIs("gce", "gke")
-
 		cs = f.ClientSet
 		if nodes := framework.GetReadySchedulableNodesOrDie(cs); len(nodes.Items) > framework.LargeClusterMinNodesNumber {
 			loadBalancerCreateTimeout = framework.LoadBalancerCreateTimeoutLarge

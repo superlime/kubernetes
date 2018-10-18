@@ -29,9 +29,12 @@ var _ = utils.SIGDescribe("Volume limits", func() {
 	var (
 		c clientset.Interface
 	)
-	f := framework.NewDefaultFramework("volume-limits-on-node")
 	BeforeEach(func() {
 		framework.SkipUnlessProviderIs("aws", "gce", "gke")
+	}
+
+	f := framework.NewDefaultFramework("volume-limits-on-node")
+	BeforeEach(func() {
 		c = f.ClientSet
 		framework.ExpectNoError(framework.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))
 	})
