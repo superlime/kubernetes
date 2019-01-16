@@ -107,7 +107,7 @@ func (t *dnsTestCommon) checkDNSRecordFrom(name string, predicate func([]string)
 
 // runDig queries for `dnsName`. Returns a list of responses.
 func (t *dnsTestCommon) runDig(dnsName, target string) []string {
-	cmd := []string{"/usr/bin/dig", "+short"}
+	cmd := []string{"dig", "+short"}
 	switch target {
 	case "coredns":
 		cmd = append(cmd, "@"+t.dnsPod.Status.PodIP)

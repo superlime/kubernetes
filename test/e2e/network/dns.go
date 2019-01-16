@@ -483,7 +483,7 @@ var _ = SIGDescribe("DNS", func() {
 		// This verifies both:
 		// - Custom search path is appended.
 		// - DNS query is sent to the specified server.
-		cmd = []string{"/usr/bin/dig", "+short", "+search", testDNSNameShort}
+		cmd = []string{"dig", "+short", "+search", testDNSNameShort}
 		digFunc := func() (bool, error) {
 			stdout, stderr, err := f.ExecWithOptions(framework.ExecOptions{
 				Command:       cmd,
