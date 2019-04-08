@@ -362,27 +362,24 @@ while true; do sleep 1; done
 				imagePullTest(image, false, v1.PodPending, true, false)
 			})
 
-			It("should be able to pull image from gcr.io [LinuxOnly] [NodeConformance]", func() {
-				image := "gcr.io/google-containers/debian-base:0.4.1"
-				imagePullTest(image, false, v1.PodRunning, false, false)
-			})
-
 			It("should be able to pull image from gcr.io [NodeConformance]", func() {
-				framework.SkipUnlessNodeOSDistroIs("windows")
-				image := "gcr.io/kubernetes-e2e-test-images/windows-nanoserver:v1"
-				imagePullTest(image, false, v1.PodRunning, false, true)
-			})
-
-			It("should be able to pull image from docker hub [LinuxOnly] [NodeConformance]", func() {
-				image := "alpine:3.7"
-				imagePullTest(image, false, v1.PodRunning, false, false)
+				image := "gcr.io/google-containers/debian-base:0.4.1"
+				isWindows := false
+				if framework.NodeOSDistroIs("windows") {
+					image = "gcr.io/kubernetes-e2e-test-images/windows-nanoserver:v1"
+					isWindows = true
+				}
+				imagePullTest(image, false, v1.PodRunning, false, isWindows)
 			})
 
 			It("should be able to pull image from docker hub [NodeConformance]", func() {
-				framework.SkipUnlessNodeOSDistroIs("windows")
-				// TODO(claudiub): Switch to nanoserver image manifest list.
-				image := "e2eteam/busybox:1.29"
-				imagePullTest(image, false, v1.PodRunning, false, true)
+				image := "alpine:3.7"
+				isWindows := false
+				if framework.NodeOSDistroIs("windows") {
+					image = "e2eteam/busybox:1.29"
+					isWindows = true
+				}
+				imagePullTest(image, false, v1.PodRunning, false, isWindows)
 			})
 
 			It("should not be able to pull from private registry without secret [NodeConformance]", func() {
@@ -390,15 +387,14 @@ while true; do sleep 1; done
 				imagePullTest(image, false, v1.PodPending, true, false)
 			})
 
-			It("should be able to pull from private registry with secret [LinuxOnly] [NodeConformance]", func() {
-				image := "gcr.io/authenticated-image-pulling/alpine:3.7"
-				imagePullTest(image, true, v1.PodRunning, false, false)
-			})
-
 			It("should be able to pull from private registry with secret [NodeConformance]", func() {
-				framework.SkipUnlessNodeOSDistroIs("windows")
-				image := "gcr.io/authenticated-image-pulling/windows-nanoserver:v1"
-				imagePullTest(image, true, v1.PodRunning, false, true)
+				image := "gcr.io/authenticated-image-pulling/alpine:3.7"
+				isWindows := false
+				if framework.NodeOSDistroIs("windows") {
+					image = "gcr.io/authenticated-image-pulling/windows-nanoserver:v1"
+					isWindows = true
+				}
+				imagePullTest(image, true, v1.PodRunning, false, isWindows)
 			})
 		})
 	})
