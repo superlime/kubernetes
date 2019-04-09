@@ -89,7 +89,7 @@ all:
 	@echo "$$ALL_HELP_INFO"
 else
 all: generated_files
-	hack/make-rules/build.sh $(WHAT)
+	hack/make-rules/build.sh -x $(WHAT)
 endif
 
 define GINKGO_HELP_INFO
@@ -104,7 +104,7 @@ ginkgo:
 	@echo "$$GINKGO_HELP_INFO"
 else
 ginkgo:
-	hack/make-rules/build.sh vendor/github.com/onsi/ginkgo/ginkgo
+	hack/make-rules/build.sh -x vendor/github.com/onsi/ginkgo/ginkgo
 endif
 
 define VERIFY_HELP_INFO

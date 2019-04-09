@@ -49,6 +49,9 @@ func RootDir() (string, error) {
 	_, testExec, _, _ := runtime.Caller(0)
 	path := filepath.Dir(testExec)
 
+	// Windows uses backslashes.
+	path = strings.Replace(path, "\\", "/", -1)
+
 	// Look for the kubernetes source root directory
 	if strings.Contains(path, "k8s.io/kubernetes") {
 		splitPath := strings.Split(path, "k8s.io/kubernetes")

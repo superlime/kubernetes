@@ -331,6 +331,8 @@ kube::golang::set_platform_envs() {
         export CC=s390x-linux-gnu-gcc
         ;;
     esac
+  elif [[ $(kube::golang::host_platform) == "windows/amd64" ]]; then
+    export CGO_ENABLED=0
   fi
 }
 
@@ -352,7 +354,7 @@ kube::golang::create_gopath_tree() {
 
   # TODO: This symlink should be relative.
   if [[ ! -e "${go_pkg_dir}" || "$(readlink "${go_pkg_dir}")" != "${KUBE_ROOT}" ]]; then
-    ln -snf "${KUBE_ROOT}" "${go_pkg_dir}"
+    kube::util::symlink "${KUBE_ROOT}" "${go_pkg_dir}"
   fi
 
   # Using bazel with a recursive target (e.g. bazel test ...) will abort due to
@@ -463,14 +465,20 @@ kube::golang::place_bins() {
     if [[ "${platform}" == "${host_platform}" ]]; then
       platform_src=""
       rm -f "${THIS_PLATFORM_BIN}"
-      ln -s "${KUBE_OUTPUT_BINPATH}/${platform}" "${THIS_PLATFORM_BIN}"
+      kube::util::symlink "${KUBE_OUTPUT_BINPATH}/${platform}" "${THIS_PLATFORM_BIN}"
     fi
 
     local full_binpath_src="${KUBE_GOPATH}/bin${platform_src}"
     if [[ -d "${full_binpath_src}" ]]; then
       mkdir -p "${KUBE_OUTPUT_BINPATH}/${platform}"
-      find "${full_binpath_src}" -maxdepth 1 -type f -exec \
-        rsync -pc {} "${KUBE_OUTPUT_BINPATH}/${platform}" \;
+      if [[ "windows" != "`kube::util::host_os`" ]]; then
+        find "${full_binpath_src}" -maxdepth 1 -type f -exec \
+          rsync -pc {} "${KUBE_OUTPUT_BINPATH}/${platform}" \;
+      else
+        src_path=`echo "${full_binpath_src}" | sed "s#/c/#/#" | sed "s#/#\\\\\#g"`
+        dest_path=`echo "${KUBE_OUTPUT_BINPATH}/${platform}" | sed "s#/c/#/#" | sed "s#/#\\\\\#g"`
+        robocopy "$src_path" "$dest_path" || true
+      fi
     fi
   done
 }

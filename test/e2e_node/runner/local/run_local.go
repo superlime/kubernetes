@@ -54,8 +54,8 @@ func main() {
 		klog.Fatalf("Failed to get build output directory: %v", err)
 	}
 	klog.Infof("Got build output dir: %v", outputDir)
-	ginkgo := filepath.Join(outputDir, "ginkgo")
-	test := filepath.Join(outputDir, "e2e_node.test")
+	ginkgo := strings.Replace(filepath.Join(outputDir, "ginkgo"), "\\", "/", -1)
+	test := strings.Replace(filepath.Join(outputDir, "e2e_node.test"), "\\", "/", -1)
 
 	args := []string{*ginkgoFlags, test, "--", *testFlags}
 	if *systemSpecName != "" {
@@ -66,6 +66,7 @@ func main() {
 		systemSpecFile := filepath.Join(rootDir, system.SystemSpecPath, *systemSpecName+".yaml")
 		args = append(args, fmt.Sprintf("--system-spec-name=%s --system-spec-file=%s --extra-envs=%s", *systemSpecName, systemSpecFile, *extraEnvs))
 	}
+	//if err := runCommand(fmt.Sprintf("%s.exe", ginkgo), args...); err != nil {
 	if err := runCommand(ginkgo, args...); err != nil {
 		klog.Exitf("Test failed: %v", err)
 	}
@@ -74,7 +75,7 @@ func main() {
 
 func runCommand(name string, args ...string) error {
 	klog.Infof("Running command: %v %v", name, strings.Join(args, " "))
-	cmd := exec.Command("sudo", "sh", "-c", strings.Join(append([]string{name}, args...), " "))
+	cmd := exec.Command("sh", "-c", strings.Join(append([]string{name}, args...), " "))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

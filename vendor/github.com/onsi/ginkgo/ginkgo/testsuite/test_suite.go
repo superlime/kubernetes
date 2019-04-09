@@ -1,11 +1,13 @@
 package testsuite
 
 import (
+	"fmt"
 	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -22,16 +24,23 @@ func PrecompiledTestSuite(path string) (TestSuite, error) {
 		return TestSuite{}, err
 	}
 
+	fmt.Printf("Checking %v for precompiled test suite.\n", path)
 	if info.IsDir() {
 		return TestSuite{}, errors.New("this is a directory, not a file")
 	}
 
-	if filepath.Ext(path) != ".test" {
+	fmt.Printf("Checking %v for precompiled test suite. Not a dir.\n", path)
+	if !(filepath.Ext(path) == ".test" || strings.HasSuffix(path, ".test.exe")) {
 		return TestSuite{}, errors.New("this is not a .test binary")
 	}
 
-	if info.Mode()&0111 == 0 {
+	fmt.Printf("Checking %v for precompiled test suite. Has '.test' or '.test.exe' suffix\n", path)
+	mode := info.Mode()
+	fmt.Printf("Checking %v for precompiled test suite. File mode: %v\n", path, mode)
+	if info.Mode()&0111 == 0 && runtime.GOOS != "windows" {
 		return TestSuite{}, errors.New("this is not executable")
+	//} else if filepath.Ext(path) != ".exe" {
+	//	return TestSuite{}, errors.New("this is not executable")
 	}
 
 	dir := relPath(filepath.Dir(path))

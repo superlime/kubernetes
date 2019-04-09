@@ -156,8 +156,10 @@ if [ ${remote} = true ] ; then
 else
   # Refresh sudo credentials for local run
   if ! ping -c 1 -q metadata.google.internal &> /dev/null; then
-    echo "Updating sudo credentials"
-    sudo -v || exit 1
+    if [[ "windows" != "`kube::util::host_os`" ]]; then
+      echo "Updating sudo credentials"
+      sudo -v || exit 1
+    fi
   fi
 
   # Do not use any network plugin by default. User could override the flags with
@@ -173,6 +175,6 @@ else
     --system-spec-name="${system_spec_name}" --extra-envs="${extra_envs}" \
     --ginkgo-flags="${ginkgoflags}" --test-flags="--container-runtime=${runtime} \
     --alsologtostderr --v 4 --report-dir=${artifacts} --node-name $(hostname) \
-    ${test_args}" --build-dependencies=true 2>&1 | tee -i "${artifacts}/build-log.txt"
+    ${test_args}" --build-dependencies=false 2>&1 | tee -i "${artifacts}/build-log.txt"
   exit $?
 fi

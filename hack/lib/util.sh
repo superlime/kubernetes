@@ -118,8 +118,11 @@ kube::util::host_os() {
     Linux)
       host_os=linux
       ;;
+    *_NT-*)
+      host_os=windows
+      ;;
     *)
-      kube::log::error "Unsupported host OS.  Must be Linux or Mac OS X."
+      kube::log::error "Unsupported host OS.  Must be Linux, Mac OS X, or Windows."
       exit 1
       ;;
   esac
@@ -814,6 +817,25 @@ function kube::util::require-jq {
   if ! command -v jq &>/dev/null; then
     echo "jq not found. Please install." 1>&2
     return 1
+  fi
+}
+
+# kube::util::symlink <target> <link_name>
+# Creates the a symlink for <target> at <link_name>
+function kube::util::symlink {
+  local target="$1"
+  local link_name="$2"
+
+  mkdir -p "$target"
+
+  # TODO: This symlink should be relative.
+  if [[ "windows" = "`kube::util::host_os`" ]]; then
+    # ln on Windows does not create a symbolic link.
+    target=`echo \"$target\" | sed "s#/c/#/#"`
+    link_name=`echo \"$link_name\" | sed "s#/c/#/#"`
+    powershell -Command "New-Item -ItemType SymbolicLink -Value $target -Path $link_name"
+  else
+    ln -snf "${target}" "${link_name}"
   fi
 }
 

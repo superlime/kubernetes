@@ -1,5 +1,3 @@
-// +build linux
-
 /*
 Copyright 2016 The Kubernetes Authors.
 
@@ -30,7 +28,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"syscall"
 	"testing"
 	"time"
 
@@ -111,9 +108,9 @@ func TestE2eNode(t *testing.T) {
 			// as in the root filesystem.
 			// TODO(random-liu): Consider to chroot the whole test process to make writing
 			// test easier.
-			if err := syscall.Chroot(rootfs); err != nil {
-				klog.Exitf("chroot %q failed: %v", rootfs, err)
-			}
+			//if err := syscall.Chroot(rootfs); err != nil {
+			//	klog.Exitf("chroot %q failed: %v", rootfs, err)
+			//}
 		}
 		if _, err := system.ValidateSpec(*spec, framework.TestContext.ContainerRuntime); err != nil {
 			klog.Exitf("system validation failed: %v", err)

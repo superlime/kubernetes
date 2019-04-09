@@ -92,18 +92,14 @@ FORCE:
 ifeq ($(DBG_MAKEFILE),1)
     $(warning ***** finding all *.go dirs)
 endif
-ALL_GO_DIRS := $(shell                                                   \
-    hack/make-rules/helpers/cache_go_dirs.sh $(META_DIR)/all_go_dirs.mk  \
-)
 
 # Generate a list of all files that have a `+k8s:` comment-tag.  This will be
 # used to derive lists of files/dirs for generation tools.
 ifeq ($(DBG_MAKEFILE),1)
     $(warning ***** finding all +k8s: tags)
 endif
-ALL_K8S_TAG_FILES := $(shell                             \
-    find $(ALL_GO_DIRS) -maxdepth 1 -type f -name \*.go  \
-        | xargs grep --color=never -l '^// *+k8s:'       \
+ALL_K8S_TAG_FILES := $(shell                                              \
+    hack/make-rules/helpers/cache_go_files.sh $(META_DIR)/all_go_files.mk  \
 )
 
 
@@ -135,7 +131,7 @@ ifeq ($(DBG_MAKEFILE),1)
     $(warning ***** finding all +k8s:deepcopy-gen tags)
 endif
 DEEPCOPY_DIRS := $(shell                                             \
-    grep --color=never -l '+k8s:deepcopy-gen=' $(ALL_K8S_TAG_FILES)  \
+    hack/make-rules/helpers/cache_go_files.sh $(META_DIR)/all_go_files.mk | xargs grep --color=never -l '+k8s:deepcopy-gen=' \
         | xargs -n1 dirname                                          \
         | LC_ALL=C sort -u                                           \
 )
@@ -230,7 +226,7 @@ ifeq ($(DBG_MAKEFILE),1)
     $(warning ***** finding all +k8s:defaulter-gen tags)
 endif
 DEFAULTER_DIRS := $(shell                                            \
-    grep --color=never -l '+k8s:defaulter-gen=' $(ALL_K8S_TAG_FILES) \
+    hack/make-rules/helpers/cache_go_files.sh $(META_DIR)/all_go_files.mk | xargs grep --color=never -l '+k8s:defaulter-gen=' \
         | xargs -n1 dirname                                          \
         | LC_ALL=C sort -u                                           \
 )
@@ -332,7 +328,7 @@ ifeq ($(DBG_MAKEFILE),1)
     $(warning ***** finding all +k8s:conversion-gen tags)
 endif
 CONVERSION_DIRS := $(shell                                              \
-    grep --color=never '^// *+k8s:conversion-gen=' $(ALL_K8S_TAG_FILES) \
+    hack/make-rules/helpers/cache_go_files.sh $(META_DIR)/all_go_files.mk | xargs grep --color=never '^// *+k8s:conversion-gen=' \
         | cut -f1 -d:                                                   \
         | xargs -n1 dirname                                             \
         | LC_ALL=C sort -u                                              \
@@ -432,7 +428,7 @@ ifeq ($(DBG_MAKEFILE),1)
     $(warning ***** finding all +k8s:openapi-gen tags)
 endif
 OPENAPI_DIRS := $(shell                                             \
-    grep --color=never -l '+k8s:openapi-gen=' $(ALL_K8S_TAG_FILES)  \
+    hack/make-rules/helpers/cache_go_files.sh $(META_DIR)/all_go_files.mk | xargs grep --color=never -l '+k8s:openapi-gen=' \
         | xargs -n1 dirname                                         \
         | LC_ALL=C sort -u                                          \
 )

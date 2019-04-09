@@ -30,7 +30,7 @@ type CgroupSubsystems struct {
 	MountPoints map[string]string
 }
 
-func NewCgroupManager(_ interface{}) CgroupManager {
+func NewCgroupManager(_ interface{}, cgroupDriver string) CgroupManager {
 	return &unsupportedCgroupManager{}
 }
 

@@ -1,5 +1,3 @@
-// +build linux
-
 /*
 Copyright 2015 The Kubernetes Authors.
 
@@ -22,7 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -33,7 +30,6 @@ import (
 
 	cadvisorclient "github.com/google/cadvisor/client/v2"
 	cadvisorapiv2 "github.com/google/cadvisor/info/v2"
-	"github.com/opencontainers/runc/libcontainer/cgroups"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -502,49 +498,4 @@ func getContainerNameForProcess(name, pidFile string) (string, error) {
 		return "", err
 	}
 	return cont, nil
-}
-
-// getContainer returns the cgroup associated with the specified pid.
-// It enforces a unified hierarchy for memory and cpu cgroups.
-// On systemd environments, it uses the name=systemd cgroup for the specified pid.
-func getContainer(pid int) (string, error) {
-	cgs, err := cgroups.ParseCgroupFile(fmt.Sprintf("/proc/%d/cgroup", pid))
-	if err != nil {
-		return "", err
-	}
-
-	cpu, found := cgs["cpu"]
-	if !found {
-		return "", cgroups.NewNotFoundError("cpu")
-	}
-	memory, found := cgs["memory"]
-	if !found {
-		return "", cgroups.NewNotFoundError("memory")
-	}
-
-	// since we use this container for accounting, we need to ensure it is a unified hierarchy.
-	if cpu != memory {
-		return "", fmt.Errorf("cpu and memory cgroup hierarchy not unified.  cpu: %s, memory: %s", cpu, memory)
-	}
-
-	// on systemd, every pid is in a unified cgroup hierarchy (name=systemd as seen in systemd-cgls)
-	// cpu and memory accounting is off by default, users may choose to enable it per unit or globally.
-	// users could enable CPU and memory accounting globally via /etc/systemd/system.conf (DefaultCPUAccounting=true DefaultMemoryAccounting=true).
-	// users could also enable CPU and memory accounting per unit via CPUAccounting=true and MemoryAccounting=true
-	// we only warn if accounting is not enabled for CPU or memory so as to not break local development flows where kubelet is launched in a terminal.
-	// for example, the cgroup for the user session will be something like /user.slice/user-X.slice/session-X.scope, but the cpu and memory
-	// cgroup will be the closest ancestor where accounting is performed (most likely /) on systems that launch docker containers.
-	// as a result, on those systems, you will not get cpu or memory accounting statistics for kubelet.
-	// in addition, you would not get memory or cpu accounting for the runtime unless accounting was enabled on its unit (or globally).
-	if systemd, found := cgs["name=systemd"]; found {
-		if systemd != cpu {
-			log.Printf("CPUAccounting not enabled for pid: %d", pid)
-		}
-		if systemd != memory {
-			log.Printf("MemoryAccounting not enabled for pid: %d", pid)
-		}
-		return systemd, nil
-	}
-
-	return cpu, nil
 }
