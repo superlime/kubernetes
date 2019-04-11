@@ -704,7 +704,7 @@ func (config *NetworkingTestConfig) getNamespacesClient() coreclientset.Namespac
 
 // CheckReachabilityFromPod checks reachability from the specified pod.
 func CheckReachabilityFromPod(expectToBeReachable bool, timeout time.Duration, namespace, pod, target string) {
-	cmd := fmt.Sprintf("wget -T 5 -qO- %q", target)
+	cmd := fmt.Sprintf("wget -qO- %q", target)
 	err := wait.PollImmediate(Poll, timeout, func() (bool, error) {
 		_, err := RunHostCmd(namespace, pod, cmd)
 		if expectToBeReachable && err != nil {

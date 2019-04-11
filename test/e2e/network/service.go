@@ -1337,7 +1337,7 @@ var _ = SIGDescribe("Services", func() {
 		framework.ExpectNoError(err)
 
 		By("Check if pod is unreachable")
-		cmd = fmt.Sprintf("wget -qO- -T 2 http://%s:%d/; test \"$?\" -eq \"1\"", svcName, port)
+		cmd = fmt.Sprintf("wget -qO- http://%s:%d/; test \"$?\" -eq \"1\"", svcName, port)
 		if pollErr := wait.PollImmediate(framework.Poll, framework.KubeProxyLagTimeout, func() (bool, error) {
 			var err error
 			stdout, err = framework.RunHostCmd(f.Namespace.Name, execPodName, cmd)
@@ -1816,7 +1816,7 @@ var _ = SIGDescribe("Services", func() {
 
 		serviceAddress := net.JoinHostPort(serviceName, strconv.Itoa(port))
 		e2elog.Logf("waiting up to %v wget %v", framework.KubeProxyEndpointLagTimeout, serviceAddress)
-		cmd := fmt.Sprintf(`wget -T 3 -qO- %v`, serviceAddress)
+		cmd := fmt.Sprintf(`wget -qO- %v`, serviceAddress)
 
 		By(fmt.Sprintf("hitting service %v from pod %v on node %v", serviceAddress, podName, nodeName))
 		expectedErr := "connection refused"
@@ -2029,7 +2029,7 @@ var _ = SIGDescribe("ESIPP [Slow] [DisabledForLargeClusters]", func() {
 		framework.ExpectNoError(err)
 
 		e2elog.Logf("Waiting up to %v wget %v", framework.KubeProxyLagTimeout, path)
-		cmd := fmt.Sprintf(`wget -T 30 -qO- %v`, path)
+		cmd := fmt.Sprintf(`wget -qO- %v`, path)
 
 		var srcIP string
 		By(fmt.Sprintf("Hitting external lb %v from pod %v on node %v", ingressIP, podName, nodeName))
@@ -2171,7 +2171,7 @@ func execSourceipTest(f *framework.Framework, c clientset.Interface, ns, nodeNam
 	serviceIPPort := net.JoinHostPort(serviceIP, strconv.Itoa(servicePort))
 	timeout := 2 * time.Minute
 	e2elog.Logf("Waiting up to %v wget %s", timeout, serviceIPPort)
-	cmd := fmt.Sprintf(`wget -T 30 -qO- %s | grep client_address`, serviceIPPort)
+	cmd := fmt.Sprintf(`wget -qO- %s | grep client_address`, serviceIPPort)
 	for start := time.Now(); time.Since(start) < timeout; time.Sleep(2 * time.Second) {
 		stdout, err = framework.RunHostCmd(execPod.Namespace, execPod.Name, cmd)
 		if err != nil {

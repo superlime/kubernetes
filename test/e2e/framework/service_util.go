@@ -1388,7 +1388,7 @@ func VerifyServeHostnameServiceUp(c clientset.Interface, ns, host string, expect
 		},
 		// verify service from pod
 		func() string {
-			cmd := buildCommand("wget -q -T 1 -O -")
+			cmd := buildCommand("wget -q -O -")
 			Logf("Executing cmd %q in pod %v/%v", cmd, ns, execPodName)
 			// TODO: Use exec-over-http via the netexec pod instead of kubectl exec.
 			output, err := RunHostCmd(ns, execPodName, cmd)
@@ -1550,7 +1550,7 @@ func checkAffinityFailed(tracker affinityTracker, err string) {
 // return false only in case of unexpected errors.
 func CheckAffinity(jig *ServiceTestJig, execPod *v1.Pod, targetIP string, targetPort int, shouldHold bool) bool {
 	targetIPPort := net.JoinHostPort(targetIP, strconv.Itoa(targetPort))
-	cmd := fmt.Sprintf(`wget -qO- http://%s/ -T 2`, targetIPPort)
+	cmd := fmt.Sprintf(`wget -qO- http://%s/`, targetIPPort)
 	timeout := ServiceTestTimeout
 	if execPod == nil {
 		timeout = LoadBalancerPollTimeout
