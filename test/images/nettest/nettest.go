@@ -241,11 +241,21 @@ func contactOthers(state *State) {
 	if err != nil {
 		log.Fatalf("Unable to create client; error: %v\n", err)
 	}
-	// Double check that worked by getting the server version.
-	if v, err := client.Discovery().ServerVersion(); err != nil {
-		log.Fatalf("Unable to get server version: %v\n", err)
-	} else {
-		log.Printf("Server version: %#v\n", v)
+
+	// the pod might not have network connectivity on the first try.
+	for i := 0; i < 15; i++ {
+		// Double check that worked by getting the server version.
+		if v, err := client.Discovery().ServerVersion(); err != nil {
+			log.Fatalf("Unable to get server version: %v\n", err)
+		} else {
+			log.Printf("Server version: %#v\n", v)
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+	if err != nil {
+		log.Fatalf("Unable to contact Kubernetes: %v\n", err)
 	}
 
 	for start := time.Now(); time.Since(start) < timeout; time.Sleep(sleepTime) {
