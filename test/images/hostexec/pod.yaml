@@ -7,6 +7,6 @@ metadata:
 spec:
   containers:
   - name: hostexec
-    image: gcr.io/kubernetes-e2e-test-images/hostexec-amd64:1.2
+    image: gcr.io/kubernetes-e2e-test-images/hostexec:1.2-linux-amd64
   securityContext:
     hostNetwork: true

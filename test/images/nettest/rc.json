@@ -22,7 +22,7 @@
         "containers": [
           {
             "name": "webserver",
-            "image": "gcr.io/kubernetes-e2e-test-images/nettest-amd64:1.1",
+            "image": "gcr.io/kubernetes-e2e-test-images/nettest:1.1-linux-amd64",
             "imagePullPolicy": "Always",
             "args": [
               "-service=nettest",
