@@ -1,4 +1,4 @@
-# Copyright 2017 The Kubernetes Authors.
+# Copyright 2019 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SRCS=no-snat-test-proxy
-OS ?= linux
-ARCH ?= amd64
-TARGET ?= $(CURDIR)
-GOLANG_VERSION ?= latest
-SRC_DIR = $(notdir $(shell pwd))
-export
+FROM e2eteam/curl:1803 AS prep
+FROM BASEIMAGE
 
-bin:
-	../image-util.sh bin $(SRCS)
-
-.PHONY: bin
+COPY --from=prep /curl/ /curl
+ADD https://github.com/kubernetes-sigs/windows-testing/raw/master/images/busybox/busybox.exe /bin/busybox.exe
+ADD https://github.com/diegocr/netcat/raw/master/nc.exe /bin/nc.exe
+USER ContainerAdministrator
+RUN FOR /f "tokens=*" %i IN ('C:\bin\busybox --list') DO mklink C:\bin\%i.exe C:\bin\busybox.exe
+RUN setx /M PATH "C:\bin;C:\curl\;%PATH%" &\
+    mkdir C:\tmp
+ENTRYPOINT ["cmd.exe", "/s", "/c"]

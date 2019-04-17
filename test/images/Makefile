@@ -15,6 +15,7 @@
 include  ../../hack/make-rules/Makefile.manifest
 
 REGISTRY ?= gcr.io/kubernetes-e2e-test-images
+REMOTE_DOCKER_URL ?= ""
 GOARM=7
 QEMUVERSION=v2.9.1
 GOLANG_VERSION=1.12.1
