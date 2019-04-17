@@ -8,7 +8,7 @@
     "containers": [
       {
         "name": "porter",
-        "image": "gcr.io/kubernetes-e2e-test-images/porter-amd64:1.1",
+        "image": "gcr.io/kubernetes-e2e-test-images/porter:1.1-linux-amd64",
         "env": [
           {
             "name": "SERVE_PORT_80",
