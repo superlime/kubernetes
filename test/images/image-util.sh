@@ -103,7 +103,7 @@ build() {
       fi
     fi
 
-    docker build --pull -t "${REGISTRY}/${IMAGE}-${arch}:${TAG}" .
+    docker build --pull -t "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}" .
 
     popd
   done
@@ -135,22 +135,22 @@ push() {
       arch=`echo $base_image | cut -d "/" -f 2`
     fi
 
-    docker push "${REGISTRY}/${IMAGE}-${arch}:${TAG}"
+    docker push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
   done
 
   kube::util::ensure-gnu-sed
 
   # The manifest command is still experimental as of Docker 18.09.2
   export DOCKER_CLI_EXPERIMENTAL="enabled"
-  # Make base_images list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE}-amd64:${TAG} ${REGISTRY}/${IMAGE}-ppc64le:${TAG}'
-  manifest=$(echo "$base_images" | ${SED} "s~linux\/~~g" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE\-&:$TAG~g")
+  # Make base_images list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE}:${TAG}-linux-amd64 ${REGISTRY}/${IMAGE}:${TAG}-linux-ppc64le'
+  manifest=$(echo "$base_images" | ${SED} "s~\/~-~g" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE:$TAG\-&~g")
   docker manifest create --amend "${REGISTRY}/${IMAGE}:${TAG}" ${manifest}
   for base_image in ${base_images}; do
     if [[ $base_image =~ .*/.* ]]; then
       os_name=`echo $base_image | cut -d "/" -f 1`
       arch=`echo $base_image | cut -d "/" -f 2`
     fi
-    docker manifest annotate --arch "${arch}" "${REGISTRY}/${IMAGE}:${TAG}" "${REGISTRY}/${IMAGE}-${arch}:${TAG}"
+    docker manifest annotate --arch "${arch}" "${REGISTRY}/${IMAGE}:${TAG}" "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
   done
   docker manifest push --purge "${REGISTRY}/${IMAGE}:${TAG}"
 }
