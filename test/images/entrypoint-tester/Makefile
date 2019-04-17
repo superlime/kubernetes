@@ -13,6 +13,7 @@
 # limitations under the License.
 
 SRCS=ep
+OS ?= linux
 ARCH ?= amd64
 TARGET ?= $(CURDIR)
 GOLANG_VERSION ?= latest
