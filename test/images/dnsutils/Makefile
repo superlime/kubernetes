@@ -1,4 +1,4 @@
-# Copyright 2016 The Kubernetes Authors.
+# Copyright 2019 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM BASEIMAGE
+SRCS=hostname
+OS ?= linux
+ARCH ?= amd64
+TARGET ?= $(CURDIR)
+GOARM = 7
+GOLANG_VERSION ?= latest
+SRC_DIR = $(notdir $(shell pwd))
+export
 
-ENV LOGS_GENERATOR_LINES_TOTAL 1
-ENV LOGS_GENERATOR_DURATION 1s
+bin:
+	../image-util.sh bin $(SRCS)
 
-COPY logs-generator /
-
-CMD ["/logs-generator", "--logtostderr", "--log-lines-total=${LOGS_GENERATOR_LINES_TOTAL}", "--run-duration=${LOGS_GENERATOR_DURATION}"]
+.PHONY: bin

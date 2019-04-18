@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM scratch
+FROM BASEIMAGE
 ADD localhost.crt localhost.crt
 ADD localhost.key localhost.key
 ADD porter porter

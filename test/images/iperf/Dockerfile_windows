@@ -1,4 +1,4 @@
-# Copyright 2016 The Kubernetes Authors.
+# Copyright 2019 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
 
 FROM BASEIMAGE
 
-ENV LOGS_GENERATOR_LINES_TOTAL 1
-ENV LOGS_GENERATOR_DURATION 1s
+RUN powershell -Command "\
+    wget -uri 'https://iperf.fr/download/windows/iperf-2.0.9-win64.zip' -OutFile 'C:\iperf.zip';\
+    Expand-Archive -Path C:\iperf.zip -DestinationPath C:\ -Force;\
+    Rename-Item C:\iperf-2.0.9-win64 C:\iperf;\
+    Remove-Item 'C:\iperf.zip'"
 
-COPY logs-generator /
-
-CMD ["/logs-generator", "--logtostderr", "--log-lines-total=${LOGS_GENERATOR_LINES_TOTAL}", "--run-duration=${LOGS_GENERATOR_DURATION}"]
+USER ContainerAdministrator
+RUN mkdir C:\usr\local && mklink /D C:\usr\local\bin C:\iperf
+USER ContainerUser
