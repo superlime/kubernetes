@@ -20,6 +20,6 @@ ADD netexec netexec
 EXPOSE 8080
 EXPOSE 8081
 
-RUN mkdir /uploads
+RUN mkdir uploads
 
 ENTRYPOINT ["/netexec"]
