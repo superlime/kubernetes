@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM scratch
+FROM BASEIMAGE
 ADD portforwardtester portforwardtester
 ADD portforwardtester.go portforwardtester.go
 ENTRYPOINT ["/portforwardtester"]
