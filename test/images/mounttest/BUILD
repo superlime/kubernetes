@@ -8,7 +8,11 @@ load(
 
 go_library(
     name = "go_default_library",
-    srcs = ["mt.go"],
+    srcs = [
+        "mt.go",
+        "mt_utils.go",
+        "mt_utils_windows.go",
+    ],
     importpath = "k8s.io/kubernetes/test/images/mounttest",
 )
 

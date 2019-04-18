@@ -1,0 +1,6 @@
+linux/amd64=gcr.io/distroless/static:latest
+linux/arm=gcr.io/distroless/static:latest
+linux/arm64=gcr.io/distroless/static:latest
+linux/ppc64le=gcr.io/distroless/static:latest
+linux/s390x=gcr.io/distroless/static:latest
+windows/amd64=mcr.microsoft.com/windows/servercore:ltsc2019

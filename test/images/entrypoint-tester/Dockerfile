@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM scratch
+FROM BASEIMAGE
 ADD ep ep
 ADD ep ep-2
 EXPOSE 8080
