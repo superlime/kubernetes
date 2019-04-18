@@ -1,0 +1,6 @@
+linux/amd64=k8s.gcr.io/debian-base:v1.0.0
+linux/arm=k8s.gcr.io/debian-base:v1.0.0
+linux/arm64=k8s.gcr.io/debian-base:v1.0.0
+linux/ppc64le=k8s.gcr.io/debian-base:v1.0.0
+linux/s390x=k8s.gcr.io/debian-base:v1.0.0
+windows/amd64=mcr.microsoft.com/windows/servercore:ltsc2019
