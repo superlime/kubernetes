@@ -67,6 +67,11 @@ build() {
       make -C "${IMAGE}" bin ARCH="${arch}" TARGET="${temp_dir}"
     fi
     pushd "${temp_dir}"
+
+    # we might have to build multiple images with the same name, but different versions.
+    # in this case, they will have different folders. in order to keep the same name, they will
+    # have an ALIAS file with the actual image name.
+    IMAGE_NAME=$(cat ALIAS 2> /dev/null || echo "${IMAGE}")
     # image tag
     TAG=$(<VERSION)
 
@@ -96,7 +101,16 @@ build() {
       fi
     fi
 
-    docker build --pull -t "${REGISTRY}/${IMAGE}-${arch}:${TAG}" .
+    if [[ "$os_name" = "linux" ]]; then
+      docker build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" .
+    elif [[ -v "REMOTE_DOCKER_URL" && ! -z "${REMOTE_DOCKER_URL}" ]]; then
+      # NOTE(claudiub): We're using a remote Windows node to build the Windows Docker images.
+      # The node requires TLS authentication, and thus it is expected that the
+      # ca.pem, cert.pem, key.pem files can be found in the ~/.docker folder.
+      docker --tlsverify -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
+    else
+      echo "Cannot build the image '${IMAGE_NAME}' for ${os_name}/${arch}. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
+    fi
 
     popd
   done
@@ -115,27 +129,42 @@ docker_version_check() {
 # This function will push the docker images
 push() {
   docker_version_check
+  IMAGE_NAME=$(cat ${IMAGE}/ALIAS 2> /dev/null || echo "${IMAGE}")
   TAG=$(<"${IMAGE}"/VERSION)
   if [[ -f ${IMAGE}/BASEIMAGE ]]; then
     archs=$(listArchs)
   else
     archs=${!QEMUARCHS[@]}
   fi
-  for arch in ${archs}; do
-    docker push "${REGISTRY}/${IMAGE}-${arch}:${TAG}"
+  for base_image in ${base_images}; do
+    if [[ $base_image =~ .*/.* ]]; then
+      os_name=`echo $base_image | cut -d "/" -f 1`
+      arch=`echo $base_image | cut -d "/" -f 2`
+    fi
+
+    if [[ "$os_name" = "linux" ]]; then
+      docker push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
+    else
+      # NOTE(claudiub): We're pushing the image we built on the remote Windows node.
+      docker --tlsverify -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
+    fi
   done
 
   kube::util::ensure-gnu-sed
 
   # The manifest command is still experimental as of Docker 18.09.2
   export DOCKER_CLI_EXPERIMENTAL="enabled"
-  # Make archs list into image manifest. Eg: 'amd64 ppc64le' to '${REGISTRY}/${IMAGE}-amd64:${TAG} ${REGISTRY}/${IMAGE}-ppc64le:${TAG}'
-  manifest=$(echo "$archs" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE\-&:$TAG~g")
-  docker manifest create --amend "${REGISTRY}/${IMAGE}:${TAG}" ${manifest}
-  for arch in ${archs}; do
-    docker manifest annotate --arch "${arch}" "${REGISTRY}/${IMAGE}:${TAG}" "${REGISTRY}/${IMAGE}-${arch}:${TAG}"
+  # Make base_images list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE_NAME}:${TAG}-linux-amd64 ${REGISTRY}/${IMAGE}:${TAG}-linux-ppc64le'
+  manifest=$(echo "$base_images" | ${SED} "s~\/~-~g" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE_NAME:$TAG\-&~g")
+  docker manifest create --amend "${REGISTRY}/${IMAGE_NAME}:${TAG}" ${manifest}
+  for base_image in ${base_images}; do
+    if [[ $base_image =~ .*/.* ]]; then
+      os_name=`echo $base_image | cut -d "/" -f 1`
+      arch=`echo $base_image | cut -d "/" -f 2`
+    fi
+    docker manifest annotate --os "${os_name}" --arch "${arch}" "${REGISTRY}/${IMAGE_NAME}:${TAG}" "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
   done
-  docker manifest push --purge "${REGISTRY}/${IMAGE}:${TAG}"
+  docker manifest push --purge "${REGISTRY}/${IMAGE_NAME}:${TAG}"
 }
 
 # This function is for building the go code
