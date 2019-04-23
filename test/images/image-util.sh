@@ -111,6 +111,13 @@ build() {
       make -C "${image}" bin OS="${os_name}" ARCH="${arch}" TARGET="${temp_dir}"
     fi
     pushd "${temp_dir}"
+
+    alias_name="$(cat ALIAS 2>/dev/null || true)"
+    if [[ -n "${alias_name}" ]]; then
+      echo "Found an alias for '${image}'. Building / tagging image as '${alias_name}.'"
+      image="${alias_name}"
+    fi
+
     # image tag
     TAG=$(<VERSION)
 
@@ -185,6 +192,13 @@ push() {
     # prepend linux/ to the QEMUARCHS items.
     os_archs=$(printf 'linux/%s\n' "${!QEMUARCHS[*]}")
   fi
+
+  alias_name="$(cat ALIAS 2>/dev/null || true)"
+  if [[ -n "${alias_name}" ]]; then
+    echo "Found an alias for '${image}'. Pushing image as '${alias_name}.'"
+    image="${alias_name}"
+  fi
+
   for os_arch in ${os_archs}; do
     splitOsArch "${image}" "${os_arch}"
 
