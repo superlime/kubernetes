@@ -77,6 +77,11 @@ build() {
       make -C "${IMAGE}" bin OS="${os_name}" ARCH="${arch}" TARGET="${temp_dir}"
     fi
     pushd "${temp_dir}"
+
+    # we might have to build multiple images with the same name, but different versions.
+    # in this case, they will have different folders. in order to keep the same name, they will
+    # have an ALIAS file with the actual image name.
+    IMAGE_NAME=$(cat ALIAS 2> /dev/null || echo "${IMAGE}")
     # image tag
     TAG=$(<VERSION)
 
@@ -125,6 +130,17 @@ build() {
     else
       echo "Cannot build the image '${IMAGE}' for ${os_name}/${arch}. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
     fi
+    if [[ "$os_name" = "linux" ]]; then
+      docker build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" .
+    elif [[ -v "REMOTE_DOCKER_URL" && ! -z "${REMOTE_DOCKER_URL}" ]]; then
+      # NOTE(claudiub): We're using a remote Windows node to build the Windows Docker images.
+      # The node requires TLS authentication, and thus it is expected that the
+      # ca.pem, cert.pem, key.pem files can be found in the ~/.docker folder.
+      docker --tlsverify -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
+    else
+      echo "Cannot build the image '${IMAGE_NAME}' for ${os_name}/${arch}. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
+    fi
+
     popd
   done
 }
@@ -142,13 +158,14 @@ docker_version_check() {
 # This function will push the docker images
 push() {
   docker_version_check
+  IMAGE_NAME=$(cat ${IMAGE}/ALIAS 2> /dev/null || echo "${IMAGE}")
   TAG=$(<"${IMAGE}"/VERSION)
   if [[ -f ${IMAGE}/BASEIMAGE ]]; then
     os_archs=$(listOsArchs)
     # NOTE(claudiub): if the REMOTE_DOCKER_URL var is not set, or it is an empty string, we must skip
     # pushing the Windows image and including it into the manifest list.
     if [[ ((! -v "REMOTE_DOCKER_URL") || -z "${REMOTE_DOCKER_URL}") && -n "$(printf "%s\n" $os_archs | grep '^windows')" ]]; then
-      echo "Skipping pushing the image '${IMAGE}' for Windows. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
+      echo "Skipping pushing the image '${IMAGE_NAME}' for Windows. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
       os_archs=$(printf "%s\n" $os_archs | grep -v "^windows")
     fi
   else
@@ -160,15 +177,15 @@ push() {
       os_name=$(echo $os_arch | cut -d "/" -f 1)
       arch=$(echo $os_arch | cut -d "/" -f 2)
     else
-      echo "The BASEIMAGE file for the ${IMAGE} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
+      echo "The BASEIMAGE file for the ${IMAGE_NAME} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
       exit 1
     fi
 
     if [[ "$os_name" = "linux" ]]; then
-      docker push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
+      docker push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
     else
       # NOTE(claudiub): We're pushing the image we built on the remote Windows node.
-      docker --tlsverify -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
+      docker --tlsverify -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
     fi
   done
 
@@ -176,20 +193,20 @@ push() {
 
   # The manifest command is still experimental as of Docker 18.09.2
   export DOCKER_CLI_EXPERIMENTAL="enabled"
-  # Make os_archs list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE}:${TAG}-linux-amd64 ${REGISTRY}/${IMAGE}:${TAG}-linux-ppc64le'
-  manifest=$(echo "$os_archs" | ${SED} "s~\/~-~" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE:$TAG\-&~g")
-  docker manifest create --amend "${REGISTRY}/${IMAGE}:${TAG}" ${manifest}
+  # Make os_archs list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE_NAME}:${TAG}-linux-amd64 ${REGISTRY}/${IMAGE_NAME}:${TAG}-linux-ppc64le'
+  manifest=$(echo "$os_archs" | ${SED} "s~\/~-~" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE_NAME:$TAG\-&~g")
+  docker manifest create --amend "${REGISTRY}/${IMAGE_NAME}:${TAG}" ${manifest}
   for os_arch in ${os_archs}; do
     if [[ $os_arch =~ .*/.* ]]; then
       os_name=$(echo $os_arch | cut -d "/" -f 1)
       arch=$(echo $os_arch | cut -d "/" -f 2)
     else
-      echo "The BASEIMAGE file for the ${IMAGE} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
+      echo "The BASEIMAGE file for the ${IMAGE_NAME} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
       exit 1
     fi
-    docker manifest annotate --os "${os_name}" --arch "${arch}" "${REGISTRY}/${IMAGE}:${TAG}" "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
+    docker manifest annotate --os "${os_name}" --arch "${arch}" "${REGISTRY}/${IMAGE_NAME}:${TAG}" "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
   done
-  docker manifest push --purge "${REGISTRY}/${IMAGE}:${TAG}"
+  docker manifest push --purge "${REGISTRY}/${IMAGE_NAME}:${TAG}"
 }
 
 # This function is for building the go code
