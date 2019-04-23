@@ -140,6 +140,7 @@ push() {
 
 # This function is for building the go code
 bin() {
+  GOARM="${GOARM:-7}"
   for SRC in $@;
   do
   docker run --rm -it -v "${TARGET}:${TARGET}:Z" -v "${KUBE_ROOT}":/go/src/k8s.io/kubernetes:Z \
