@@ -310,6 +310,72 @@ func generateDNSServerPod(aRecords map[string]string) *v1.Pod {
 	return pod
 }
 
+func generateCoreDNSServerPod(corednsConfig *v1.ConfigMap) *v1.Pod {
+	return &v1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "e2e-dns-configmap-dns-server-",
+		},
+		Spec: v1.PodSpec{
+			Volumes: []v1.Volume{
+				{
+					Name: "coredns-config",
+					VolumeSource: v1.VolumeSource{
+						ConfigMap: &v1.ConfigMapVolumeSource{
+							LocalObjectReference: v1.LocalObjectReference{
+								Name: corednsConfig.Name,
+							},
+						},
+					},
+				},
+			},
+			Containers: []v1.Container{
+				{
+					Name:  "dns",
+					Image: imageutils.GetE2EImage(imageutils.Dnsutils),
+					Command: []string{
+						"/coredns",
+						"-conf", "/etc/coredns/Corefile",
+					},
+					VolumeMounts: []v1.VolumeMount{
+						{
+							Name:      "coredns-config",
+							MountPath: "/etc/coredns",
+							ReadOnly:  true,
+						},
+					},
+				},
+			},
+			DNSPolicy: "Default",
+		},
+	}
+}
+
+func generateCoreDNSConfigmap(namespaceName string, aRecords map[string]string) *v1.ConfigMap {
+	entries := ""
+	for name, ip := range aRecords {
+		entries += fmt.Sprintf("\n\t\t%v %v", ip, name)
+	}
+
+	corefileData := fmt.Sprintf(`. {
+	hosts {%s
+	}
+	log
+}`, entries)
+
+	return &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    namespaceName,
+			GenerateName: "e2e-coredns-configmap-",
+		},
+		Data: map[string]string{
+			"Corefile": corefileData,
+		},
+	}
+}
+
 func (t *dnsTestCommon) createDNSPodFromObj(pod *v1.Pod) {
 	t.dnsServerPod = pod
 

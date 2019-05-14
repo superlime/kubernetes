@@ -417,10 +417,23 @@ var _ = SIGDescribe("DNS", func() {
 		testSearchPath := "resolv.conf.local"
 		testDNSNameFull := fmt.Sprintf("%s.%s", testDNSNameShort, testSearchPath)
 
-		testServerPod := generateDNSServerPod(map[string]string{
+		corednsConfig := generateCoreDNSConfigmap(f.Namespace.Name, map[string]string{
 			testDNSNameFull: testInjectedIP,
 		})
-		testServerPod, err := f.ClientSet.CoreV1().Pods(f.Namespace.Name).Create(testServerPod)
+		corednsConfig, err := f.ClientSet.CoreV1().ConfigMaps(f.Namespace.Name).Create(corednsConfig)
+		if err != nil {
+			framework.Failf("unable to create test configMap %s: %v", corednsConfig.Name, err)
+		}
+
+		defer func() {
+			e2elog.Logf("Deleting configmap %s...", corednsConfig.Name)
+			if err := f.ClientSet.CoreV1().ConfigMaps(f.Namespace.Name).Delete(corednsConfig.Name, nil); err != nil {
+				framework.Failf("Failed to delete configmap %s: %v", corednsConfig.Name, err)
+			}
+		}()
+
+		testServerPod := generateCoreDNSServerPod(corednsConfig)
+		testServerPod, err = f.ClientSet.CoreV1().Pods(f.Namespace.Name).Create(testServerPod)
 		Expect(err).NotTo(HaveOccurred(), "failed to create pod: %s", testServerPod.Name)
 		e2elog.Logf("Created pod %v", testServerPod)
 		defer func() {
