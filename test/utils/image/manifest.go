@@ -205,7 +205,7 @@ func initImageConfigs() map[int]Config {
 	configs[CheckMetadataConcealment] = Config{e2eRegistry, "metadata-concealment", "1.2"}
 	configs[CudaVectorAdd] = Config{e2eRegistry, "cuda-vector-add", "1.0"}
 	configs[CudaVectorAdd2] = Config{e2eRegistry, "cuda-vector-add", "2.0"}
-	configs[Dnsutils] = Config{e2eRegistry, "dnsutils", "1.1"}
+	configs[Dnsutils] = Config{e2eRegistry, "dnsutils", "1.2"}
 	configs[EchoServer] = Config{e2eRegistry, "echoserver", "2.2"}
 	configs[EntrypointTester] = Config{e2eRegistry, "entrypoint-tester", "1.0"}
 	configs[Etcd] = Config{gcRegistry, "etcd", "3.3.10"}
@@ -216,7 +216,7 @@ func initImageConfigs() map[int]Config {
 	configs[InClusterClient] = Config{e2eRegistry, "inclusterclient", "1.0"}
 	configs[IpcUtils] = Config{e2eRegistry, "ipc-utils", "1.0"}
 	configs[Iperf] = Config{e2eRegistry, "iperf", "1.0"}
-	configs[JessieDnsutils] = Config{e2eRegistry, "jessie-dnsutils", "1.0"}
+	configs[JessieDnsutils] = Config{e2eRegistry, "jessie-dnsutils", "1.1"}
 	configs[Kitten] = Config{e2eRegistry, "kitten", "1.0"}
 	configs[Liveness] = Config{e2eRegistry, "liveness", "1.1"}
 	configs[LogsGenerator] = Config{e2eRegistry, "logs-generator", "1.0"}
