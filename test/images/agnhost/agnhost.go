@@ -20,7 +20,18 @@ import (
 	"github.com/spf13/cobra"
 
 	"k8s.io/kubernetes/test/images/agnhost/dns"
+	"k8s.io/kubernetes/test/images/agnhost/fakegitserver"
+	"k8s.io/kubernetes/test/images/agnhost/liveness"
+	"k8s.io/kubernetes/test/images/agnhost/logs-generator"
+	"k8s.io/kubernetes/test/images/agnhost/net"
+	"k8s.io/kubernetes/test/images/agnhost/netexec"
+	"k8s.io/kubernetes/test/images/agnhost/nettest"
+	"k8s.io/kubernetes/test/images/agnhost/no-snat-test"
+	"k8s.io/kubernetes/test/images/agnhost/no-snat-test-proxy"
 	"k8s.io/kubernetes/test/images/agnhost/pause"
+	"k8s.io/kubernetes/test/images/agnhost/port-forward-tester"
+	"k8s.io/kubernetes/test/images/agnhost/serve-hostname"
+	"k8s.io/kubernetes/test/images/agnhost/webhook"
 )
 
 func main() {
@@ -28,6 +39,17 @@ func main() {
 	rootCmd.AddCommand(dns.CmdDNSSuffix)
 	rootCmd.AddCommand(dns.CmdDNSServerList)
 	rootCmd.AddCommand(dns.CmdEtcHosts)
+	rootCmd.AddCommand(fakegitserver.CmdFakeGitServer)
+	rootCmd.AddCommand(liveness.CmdLiveness)
+	rootCmd.AddCommand(logsgen.CmdGenerateLogs)
+	rootCmd.AddCommand(net.CmdNet)
+	rootCmd.AddCommand(netexec.CmdNetexec)
+	rootCmd.AddCommand(nettest.CmdNettest)
+	rootCmd.AddCommand(nosnat.CmdNoSnatTest)
+	rootCmd.AddCommand(nosnatproxy.CmdNoSnatTestProxy)
 	rootCmd.AddCommand(pause.CmdPause)
+	rootCmd.AddCommand(portforwardtester.CmdPortForwardTester)
+	rootCmd.AddCommand(servehostname.CmdServeHostname)
+	rootCmd.AddCommand(webhook.CmdWebhook)
 	rootCmd.Execute()
 }
