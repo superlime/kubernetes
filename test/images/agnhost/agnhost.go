@@ -20,7 +20,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"k8s.io/kubernetes/test/images/agnhost/dns"
+	"k8s.io/kubernetes/test/images/agnhost/fakegitserver"
+	"k8s.io/kubernetes/test/images/agnhost/liveness"
+	"k8s.io/kubernetes/test/images/agnhost/logs-generator"
+	"k8s.io/kubernetes/test/images/agnhost/no-snat-test"
+	"k8s.io/kubernetes/test/images/agnhost/no-snat-test-proxy"
 	"k8s.io/kubernetes/test/images/agnhost/pause"
+	"k8s.io/kubernetes/test/images/agnhost/port-forward-tester"
 )
 
 func main() {
@@ -28,6 +34,12 @@ func main() {
 	rootCmd.AddCommand(dns.CmdDNSSuffix)
 	rootCmd.AddCommand(dns.CmdDNSServerList)
 	rootCmd.AddCommand(dns.CmdEtcHosts)
+	rootCmd.AddCommand(fakegitserver.CmdFakeGitServer)
+	rootCmd.AddCommand(liveness.CmdLiveness)
+	rootCmd.AddCommand(logsgen.CmdLogsGenerator)
+	rootCmd.AddCommand(nosnat.CmdNoSnatTest)
+	rootCmd.AddCommand(nosnatproxy.CmdNoSnatTestProxy)
 	rootCmd.AddCommand(pause.CmdPause)
+	rootCmd.AddCommand(portforwardtester.CmdPortForwardTester)
 	rootCmd.Execute()
 }

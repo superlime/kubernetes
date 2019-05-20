@@ -17,7 +17,13 @@ go_library(
     importpath = "k8s.io/kubernetes/test/images/agnhost",
     deps = [
         "//test/images/agnhost/dns:go_default_library",
+        "//test/images/agnhost/fakegitserver:go_default_library",
+        "//test/images/agnhost/liveness:go_default_library",
+        "//test/images/agnhost/logs-generator:go_default_library",
+        "//test/images/agnhost/no-snat-test:go_default_library",
+        "//test/images/agnhost/no-snat-test-proxy:go_default_library",
         "//test/images/agnhost/pause:go_default_library",
+        "//test/images/agnhost/port-forward-tester:go_default_library",
         "//vendor/github.com/spf13/cobra:go_default_library",
     ],
 )
@@ -34,7 +40,13 @@ filegroup(
     srcs = [
         ":package-srcs",
         "//test/images/agnhost/dns:all-srcs",
+        "//test/images/agnhost/fakegitserver:all-srcs",
+        "//test/images/agnhost/liveness:all-srcs",
+        "//test/images/agnhost/logs-generator:all-srcs",
+        "//test/images/agnhost/no-snat-test:all-srcs",
+        "//test/images/agnhost/no-snat-test-proxy:all-srcs",
         "//test/images/agnhost/pause:all-srcs",
+        "//test/images/agnhost/port-forward-tester:all-srcs",
     ],
     tags = ["automanaged"],
 )

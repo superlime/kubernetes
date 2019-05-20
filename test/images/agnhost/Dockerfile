@@ -12,7 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM scratch
+FROM BASEIMAGE
+
+CROSS_BUILD_COPY qemu-QEMUARCH-static /usr/bin/
+
+# from hostexec image
+# install necessary packages:
+# - curl, nc: used by a lot of e2e tests
+# - iproute2: includes ss used in NodePort tests
+RUN apk --update add curl netcat-openbsd iproute2 && rm -rf /var/cache/apk/*
+
+# from logs-generator
+ENV LOGS_GENERATOR_LINES_TOTAL 1
+ENV LOGS_GENERATOR_DURATION 1s
 
 ADD agnhost agnhost
 ENTRYPOINT ["/agnhost"]
+CMD ["pause"]
