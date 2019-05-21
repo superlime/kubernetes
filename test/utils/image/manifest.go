@@ -122,14 +122,10 @@ const (
 	EntrypointTester
 	// Etcd image
 	Etcd
-	// Fakegitserver image
-	Fakegitserver
 	// GBFrontend image
 	GBFrontend
 	// GBRedisSlave image
 	GBRedisSlave
-	// Hostexec image
-	Hostexec
 	// InClusterClient image
 	InClusterClient
 	// IpcUtils image
@@ -140,10 +136,6 @@ const (
 	JessieDnsutils
 	// Kitten image
 	Kitten
-	// Liveness image
-	Liveness
-	// LogsGenerator image
-	LogsGenerator
 	// Mounttest image
 	Mounttest
 	// MounttestUser image
@@ -164,17 +156,11 @@ const (
 	Nonewprivs
 	// NonRoot runs with a default user of 1234
 	NonRoot
-	// NoSnatTest image
-	NoSnatTest
-	// NoSnatTestProxy image
-	NoSnatTestProxy
 	// Pause - when these values are updated, also update cmd/kubelet/app/options/container_runtime.go
 	// Pause image
 	Pause
 	// Porter image
 	Porter
-	// PortForwardTester image
-	PortForwardTester
 	// Redis image
 	Redis
 	// ResourceConsumer image
@@ -199,7 +185,7 @@ func initImageConfigs() map[int]Config {
 	configs := map[int]Config{}
 	configs[CRDConversionWebhook] = Config{e2eRegistry, "crd-conversion-webhook", "1.13rev2"}
 	configs[AdmissionWebhook] = Config{e2eRegistry, "webhook", "1.15v1"}
-	configs[Agnhost] = Config{e2eRegistry, "agnhost", "1.0"}
+	configs[Agnhost] = Config{e2eRegistry, "agnhost", "1.1"}
 	configs[APIServer] = Config{e2eRegistry, "sample-apiserver", "1.10"}
 	configs[AppArmorLoader] = Config{e2eRegistry, "apparmor-loader", "1.0"}
 	configs[AuditProxy] = Config{e2eRegistry, "audit-proxy", "1.0"}
@@ -211,17 +197,13 @@ func initImageConfigs() map[int]Config {
 	configs[EchoServer] = Config{e2eRegistry, "echoserver", "2.2"}
 	configs[EntrypointTester] = Config{e2eRegistry, "entrypoint-tester", "1.0"}
 	configs[Etcd] = Config{gcRegistry, "etcd", "3.3.10"}
-	configs[Fakegitserver] = Config{e2eRegistry, "fakegitserver", "1.0"}
 	configs[GBFrontend] = Config{sampleRegistry, "gb-frontend", "v6"}
 	configs[GBRedisSlave] = Config{sampleRegistry, "gb-redisslave", "v3"}
-	configs[Hostexec] = Config{e2eRegistry, "hostexec", "1.1"}
 	configs[InClusterClient] = Config{e2eRegistry, "inclusterclient", "1.0"}
 	configs[IpcUtils] = Config{e2eRegistry, "ipc-utils", "1.0"}
 	configs[Iperf] = Config{e2eRegistry, "iperf", "1.0"}
 	configs[JessieDnsutils] = Config{e2eRegistry, "jessie-dnsutils", "1.0"}
 	configs[Kitten] = Config{e2eRegistry, "kitten", "1.0"}
-	configs[Liveness] = Config{e2eRegistry, "liveness", "1.1"}
-	configs[LogsGenerator] = Config{e2eRegistry, "logs-generator", "1.0"}
 	configs[Mounttest] = Config{e2eRegistry, "mounttest", "1.0"}
 	configs[MounttestUser] = Config{e2eRegistry, "mounttest-user", "1.0"}
 	configs[Nautilus] = Config{e2eRegistry, "nautilus", "1.0"}
@@ -232,12 +214,9 @@ func initImageConfigs() map[int]Config {
 	configs[NginxNew] = Config{dockerLibraryRegistry, "nginx", "1.15-alpine"}
 	configs[Nonewprivs] = Config{e2eRegistry, "nonewprivs", "1.0"}
 	configs[NonRoot] = Config{e2eRegistry, "nonroot", "1.0"}
-	configs[NoSnatTest] = Config{e2eRegistry, "no-snat-test", "1.0"}
-	configs[NoSnatTestProxy] = Config{e2eRegistry, "no-snat-test-proxy", "1.0"}
 	// Pause - when these values are updated, also update cmd/kubelet/app/options/container_runtime.go
 	configs[Pause] = Config{gcRegistry, "pause", "3.1"}
 	configs[Porter] = Config{e2eRegistry, "porter", "1.0"}
-	configs[PortForwardTester] = Config{e2eRegistry, "port-forward-tester", "1.0"}
 	configs[Redis] = Config{e2eRegistry, "redis", "1.0"}
 	configs[ResourceConsumer] = Config{e2eRegistry, "resource-consumer", "1.5"}
 	configs[ResourceController] = Config{e2eRegistry, "resource-consumer-controller", "1.0"}
