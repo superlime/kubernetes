@@ -229,7 +229,7 @@ var (
 	}
 
 	// ServeHostnameImage is a serve hostname image name.
-	ServeHostnameImage = imageutils.GetE2EImage(imageutils.ServeHostname)
+	ServeHostnameImage = imageutils.GetE2EImage(imageutils.Agnhost)
 )
 
 // GetServicesProxyRequest returns a request for a service proxy.
@@ -453,7 +453,7 @@ func ProxyMode(f *Framework) (string, error) {
 			Containers: []v1.Container{
 				{
 					Name:    "detector",
-					Image:   imageutils.GetE2EImage(imageutils.Net),
+					Image:   imageutils.GetE2EImage(imageutils.Agnhost),
 					Command: []string{"/bin/sleep", "3600"},
 				},
 			},
@@ -3323,7 +3323,7 @@ func NewExecPodSpec(ns, name string, hostNetwork bool) *v1.Pod {
 			Containers: []v1.Container{
 				{
 					Name:            "hostexec",
-					Image:           imageutils.GetE2EImage(imageutils.Hostexec),
+					Image:           imageutils.GetE2EImage(imageutils.Agnhost),
 					ImagePullPolicy: v1.PullIfNotPresent,
 				},
 			},

@@ -49,7 +49,8 @@ var _ = framework.KubeDescribe("Container Lifecycle Hook", func() {
 				Containers: []v1.Container{
 					{
 						Name:  "pod-handle-http-request",
-						Image: imageutils.GetE2EImage(imageutils.Netexec),
+						Image: imageutils.GetE2EImage(imageutils.Agnhost),
+						Args:  []string{"netexec"},
 						Ports: []v1.ContainerPort{
 							{
 								ContainerPort: 8080,
@@ -103,7 +104,7 @@ var _ = framework.KubeDescribe("Container Lifecycle Hook", func() {
 					},
 				},
 			}
-			podWithHook := getPodWithHook("pod-with-poststart-exec-hook", imageutils.GetE2EImage(imageutils.Hostexec), lifecycle)
+			podWithHook := getPodWithHook("pod-with-poststart-exec-hook", imageutils.GetE2EImage(imageutils.Agnhost), lifecycle)
 			testPodWithHook(podWithHook)
 		})
 		/*
@@ -119,7 +120,7 @@ var _ = framework.KubeDescribe("Container Lifecycle Hook", func() {
 					},
 				},
 			}
-			podWithHook := getPodWithHook("pod-with-prestop-exec-hook", imageutils.GetE2EImage(imageutils.Hostexec), lifecycle)
+			podWithHook := getPodWithHook("pod-with-prestop-exec-hook", imageutils.GetE2EImage(imageutils.Agnhost), lifecycle)
 			testPodWithHook(podWithHook)
 		})
 		/*
