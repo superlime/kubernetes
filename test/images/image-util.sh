@@ -121,12 +121,12 @@ build() {
     fi
 
     if [[ "$os_name" = "linux" ]]; then
-      docker build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" .
+      docker build  -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" .
     elif [[ -v "REMOTE_DOCKER_URL" && ! -z "${REMOTE_DOCKER_URL}" ]]; then
       # NOTE(claudiub): We're using a remote Windows node to build the Windows Docker images.
       # The node requires TLS authentication, and thus it is expected that the
       # ca.pem, cert.pem, key.pem files can be found in the ~/.docker folder.
-      docker --tlsverify -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
+      docker  -H "${REMOTE_DOCKER_URL}" build  -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
     else
       echo "Cannot build the image '${IMAGE_NAME}' for ${os_name}/${arch}. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
     fi
@@ -148,24 +148,33 @@ docker_version_check() {
 # This function will push the docker images
 push() {
   docker_version_check
-  IMAGE_NAME=$(cat ${IMAGE}/ALIAS 2> /dev/null || echo "${IMAGE}")
   TAG=$(<"${IMAGE}"/VERSION)
   if [[ -f ${IMAGE}/BASEIMAGE ]]; then
-    archs=$(listArchs)
+    os_archs=$(listOsArchs)
+    # NOTE(claudiub): if the REMOTE_DOCKER_URL var is not set, or it is an empty string, we must skip
+    # pushing the Windows image and including it into the manifest list.
+    if [[ ((! -v "REMOTE_DOCKER_URL") || -z "${REMOTE_DOCKER_URL}") && -n "$(printf "%s\n" $os_archs | grep '^windows')" ]]; then
+      echo "Skipping pushing the image '${IMAGE}' for Windows. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
+      os_archs=$(printf "%s\n" $os_archs | grep -v "^windows")
+    fi
   else
-    archs=${!QEMUARCHS[@]}
+    # prepend linux/ to the QEMUARCHS items.
+    os_archs=$(printf 'linux/%s\n' "${!QEMUARCHS[@]}")
   fi
-  for base_image in ${base_images}; do
-    if [[ $base_image =~ .*/.* ]]; then
-      os_name=`echo $base_image | cut -d "/" -f 1`
-      arch=`echo $base_image | cut -d "/" -f 2`
+  for os_arch in ${os_archs}; do
+    if [[ $os_arch =~ .*/.* ]]; then
+      os_name=$(echo $os_arch | cut -d "/" -f 1)
+      arch=$(echo $os_arch | cut -d "/" -f 2)
+    else
+      echo "The BASEIMAGE file for the ${IMAGE} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
+      exit 1
     fi
 
     if [[ "$os_name" = "linux" ]]; then
-      docker push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
+      docker push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
     else
       # NOTE(claudiub): We're pushing the image we built on the remote Windows node.
-      docker --tlsverify -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
+      docker -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
     fi
   done
 
