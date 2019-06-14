@@ -32,6 +32,8 @@ import (
 	"golang.org/x/oauth2/google"
 	sd "google.golang.org/api/logging/v2beta1"
 	pubsub "google.golang.org/api/pubsub/v1"
+
+	"github.com/onsi/ginkgo"
 )
 
 const (
@@ -90,11 +92,13 @@ func newSdLogProvider(f *framework.Framework, scope logProviderScope) (*sdLogPro
 	if err != nil {
 		return nil, err
 	}
+	ginkgo.By("Before ensureProjectHasSinkCapacity")
 	err = ensureProjectHasSinkCapacity(sdService.Projects.Sinks, framework.TestContext.CloudConfig.ProjectID)
 	if err != nil {
 		return nil, err
 	}
 
+	ginkgo.By("After ensureProject")
 	pubsubService, err := pubsub.New(hc)
 	if err != nil {
 		return nil, err
@@ -429,15 +433,18 @@ func publish(service *pubsub.Service, topic *pubsub.Topic, msg string) error {
 }
 
 func withLogProviderForScope(f *framework.Framework, scope logProviderScope, fun func(*sdLogProvider)) {
+	ginkgo.By("Before newSdLogProvider")
 	p, err := newSdLogProvider(f, scope)
 	framework.ExpectNoError(err, "Failed to create Stackdriver logs provider")
 
+	ginkgo.By("Before p.Init()")
 	err = p.Init()
 	defer p.Cleanup()
 	framework.ExpectNoError(err, "Failed to init Stackdriver logs provider")
-
+	ginkgo.By("Before utils.EnsureLoggingAgentDeployment")
 	err = utils.EnsureLoggingAgentDeployment(f, p.LoggingAgentName())
 	framework.ExpectNoError(err, "Logging agents deployed incorrectly")
 
+	ginkgo.By("Before fun()")
 	fun(p)
 }
