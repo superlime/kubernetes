@@ -336,7 +336,7 @@ const (
 	KubeletPluginsWatcher featuregate.Feature = "KubeletPluginsWatcher"
 
 	// owner: @vikaschoudhary16
-	// beta: v1.12
+	// GA: v1.15
 	//
 	//
 	// Enable resource quota scope selectors
@@ -417,6 +417,18 @@ const (
 	// Enables the AWS EBS in-tree driver to AWS EBS CSI Driver migration feature.
 	CSIMigrationAWS featuregate.Feature = "CSIMigrationAWS"
 
+	// owner: @andyzhangx
+	// alpha: v1.15
+	//
+	// Enables the Azure Disk in-tree driver to Azure Disk Driver migration feature.
+	CSIMigrationAzureDisk featuregate.Feature = "CSIMigrationAzureDisk"
+
+	// owner: @andyzhangx
+	// alpha: v1.15
+	//
+	// Enables the Azure File in-tree driver to Azure File Driver migration feature.
+	CSIMigrationAzureFile featuregate.Feature = "CSIMigrationAzureFile"
+
 	// owner: @RobertKrawitz
 	// beta: v1.15
 	//
@@ -496,6 +508,8 @@ var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureS
 	CSIMigration:                                {Default: false, PreRelease: featuregate.Alpha},
 	CSIMigrationGCE:                             {Default: false, PreRelease: featuregate.Alpha},
 	CSIMigrationAWS:                             {Default: false, PreRelease: featuregate.Alpha},
+	CSIMigrationAzureDisk:                       {Default: false, PreRelease: featuregate.Alpha},
+	CSIMigrationAzureFile:                       {Default: false, PreRelease: featuregate.Alpha},
 	RunAsGroup:                                  {Default: true, PreRelease: featuregate.Beta},
 	CSIMigrationOpenStack:                       {Default: false, PreRelease: featuregate.Alpha},
 	VolumeSubpath:                               {Default: true, PreRelease: featuregate.GA},
@@ -503,7 +517,7 @@ var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureS
 	PodReadinessGates:                           {Default: true, PreRelease: featuregate.GA, LockToDefault: true}, // remove in 1.16
 	VolumeSubpathEnvExpansion:                   {Default: true, PreRelease: featuregate.Beta},
 	KubeletPluginsWatcher:                       {Default: true, PreRelease: featuregate.GA, LockToDefault: true}, // remove in 1.16
-	ResourceQuotaScopeSelectors:                 {Default: true, PreRelease: featuregate.Beta},
+	ResourceQuotaScopeSelectors:                 {Default: true, PreRelease: featuregate.GA},
 	CSIBlockVolume:                              {Default: true, PreRelease: featuregate.Beta},
 	CSIInlineVolume:                             {Default: false, PreRelease: featuregate.Alpha},
 	RuntimeClass:                                {Default: true, PreRelease: featuregate.Beta},
@@ -531,8 +545,9 @@ var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureS
 	// unintentionally on either side:
 	apiextensionsfeatures.CustomResourceValidation:        {Default: true, PreRelease: featuregate.Beta},
 	apiextensionsfeatures.CustomResourceSubresources:      {Default: true, PreRelease: featuregate.Beta},
-	apiextensionsfeatures.CustomResourceWebhookConversion: {Default: false, PreRelease: featuregate.Alpha},
-	apiextensionsfeatures.CustomResourcePublishOpenAPI:    {Default: false, PreRelease: featuregate.Alpha},
+	apiextensionsfeatures.CustomResourceWebhookConversion: {Default: true, PreRelease: featuregate.Beta},
+	apiextensionsfeatures.CustomResourcePublishOpenAPI:    {Default: true, PreRelease: featuregate.Beta},
+	apiextensionsfeatures.CustomResourceDefaulting:        {Default: false, PreRelease: featuregate.Alpha},
 
 	// features that enable backwards compatibility but are scheduled to be removed
 	// ...

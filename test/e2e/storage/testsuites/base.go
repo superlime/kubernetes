@@ -507,16 +507,21 @@ func getVolumeOpsFromMetricsForPlugin(ms metrics.Metrics, pluginName string) opC
 }
 
 func getVolumeOpCounts(c clientset.Interface, pluginName string) opCounts {
+	if !framework.ProviderIs("gce", "gke", "aws") {
+		return opCounts{}
+	}
+
 	nodeLimit := 25
 
 	metricsGrabber, err := metrics.NewMetricsGrabber(c, nil, true, false, true, false, false)
 
 	if err != nil {
-		framework.Failf("Error creating metrics grabber : %v", err)
+		framework.ExpectNoError(err, "Error creating metrics grabber: %v", err)
 	}
 
 	if !metricsGrabber.HasRegisteredMaster() {
-		framework.Skipf("Environment does not support getting controller-manager metrics - skipping")
+		e2elog.Logf("Warning: Environment does not support getting controller-manager metrics")
+		return opCounts{}
 	}
 
 	controllerMetrics, err := metricsGrabber.GrabFromControllerManager()

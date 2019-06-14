@@ -3446,6 +3446,8 @@ func ValidatePodSecurityContext(securityContext *core.PodSecurityContext, spec *
 		if len(securityContext.Sysctls) != 0 {
 			allErrs = append(allErrs, validateSysctls(securityContext.Sysctls, fldPath.Child("sysctls"))...)
 		}
+
+		allErrs = append(allErrs, validateWindowsSecurityContextOptions(securityContext.WindowsOptions, fldPath.Child("windowsOptions"))...)
 	}
 
 	return allErrs
@@ -3690,8 +3692,11 @@ func ValidateService(service *core.Service) field.ErrorList {
 		if service.Spec.ClusterIP != "" {
 			allErrs = append(allErrs, field.Forbidden(specPath.Child("clusterIP"), "must be empty for ExternalName services"))
 		}
-		if len(service.Spec.ExternalName) > 0 {
-			allErrs = append(allErrs, ValidateDNS1123Subdomain(service.Spec.ExternalName, specPath.Child("externalName"))...)
+
+		// The value (a CNAME) may have a trailing dot to denote it as fully qualified
+		cname := strings.TrimSuffix(service.Spec.ExternalName, ".")
+		if len(cname) > 0 {
+			allErrs = append(allErrs, ValidateDNS1123Subdomain(cname, specPath.Child("externalName"))...)
 		} else {
 			allErrs = append(allErrs, field.Required(specPath.Child("externalName"), ""))
 		}
@@ -5156,7 +5161,7 @@ func ValidateEndpointsUpdate(newEndpoints, oldEndpoints *core.Endpoints) field.E
 	return allErrs
 }
 
-// ValidateSecurityContext ensure the security context contains valid settings
+// ValidateSecurityContext ensures the security context contains valid settings
 func ValidateSecurityContext(sc *core.SecurityContext, fldPath *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	//this should only be true for testing since SecurityContext is defaulted by the core
@@ -5199,6 +5204,42 @@ func ValidateSecurityContext(sc *core.SecurityContext, fldPath *field.Path) fiel
 					allErrs = append(allErrs, field.Invalid(fldPath, sc, "cannot set `allowPrivilegeEscalation` to false and `capabilities.Add` CAP_SYS_ADMIN"))
 				}
 			}
+		}
+	}
+
+	allErrs = append(allErrs, validateWindowsSecurityContextOptions(sc.WindowsOptions, fldPath.Child("windowsOptions"))...)
+
+	return allErrs
+}
+
+// maxGMSACredentialSpecLength is the max length, in bytes, for the actual contents
+// of a GMSA cred spec. In general, those shouldn't be more than a few hundred bytes,
+// so we want to give plenty of room here while still providing an upper bound.
+const (
+	maxGMSACredentialSpecLengthInKiB = 64
+	maxGMSACredentialSpecLength      = maxGMSACredentialSpecLengthInKiB * 1024
+)
+
+func validateWindowsSecurityContextOptions(windowsOptions *core.WindowsSecurityContextOptions, fieldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if windowsOptions == nil {
+		return allErrs
+	}
+
+	if windowsOptions.GMSACredentialSpecName != nil {
+		// gmsaCredentialSpecName must be the name of a custom resource
+		for _, msg := range validation.IsDNS1123Subdomain(*windowsOptions.GMSACredentialSpecName) {
+			allErrs = append(allErrs, field.Invalid(fieldPath.Child("gmsaCredentialSpecName"), windowsOptions.GMSACredentialSpecName, msg))
+		}
+	}
+
+	if windowsOptions.GMSACredentialSpec != nil {
+		if l := len(*windowsOptions.GMSACredentialSpec); l == 0 {
+			allErrs = append(allErrs, field.Invalid(fieldPath.Child("gmsaCredentialSpec"), windowsOptions.GMSACredentialSpec, "gmsaCredentialSpec cannot be an empty string"))
+		} else if l > maxGMSACredentialSpecLength {
+			errMsg := fmt.Sprintf("gmsaCredentialSpec size must be under %d KiB", maxGMSACredentialSpecLengthInKiB)
+			allErrs = append(allErrs, field.Invalid(fieldPath.Child("gmsaCredentialSpec"), windowsOptions.GMSACredentialSpec, errMsg))
 		}
 	}
 

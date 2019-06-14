@@ -730,7 +730,6 @@ function construct-common-kubelet-flags {
 function construct-linux-kubelet-flags {
   local master="$1"
   local flags="$(construct-common-kubelet-flags)"
-  flags+=" --allow-privileged=true"
   # Keep in sync with CONTAINERIZED_MOUNTER_HOME in configure-helper.sh
   flags+=" --experimental-mounter-path=/home/kubernetes/containerized_mounter/mounter"
   flags+=" --experimental-check-node-capabilities-before-mount=true"
@@ -746,6 +745,7 @@ function construct-linux-kubelet-flags {
       #TODO(mikedanese): allow static pods to start before creating a client
       #flags+=" --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig"
       #flags+=" --kubeconfig=/var/lib/kubelet/kubeconfig"
+      flags+=" --register-with-taints=node-role.kubernetes.io/master=:NoSchedule"
       flags+=" --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig"
       flags+=" --register-schedulable=false"
     fi
@@ -1406,6 +1406,11 @@ EOF
     if [ -n "${API_SERVER_TEST_LOG_LEVEL:-}" ]; then
       cat >>$file <<EOF
 API_SERVER_TEST_LOG_LEVEL: $(yaml-quote ${API_SERVER_TEST_LOG_LEVEL})
+EOF
+    fi
+    if [ -n "${ETCD_LISTEN_CLIENT_IP:-}" ]; then
+      cat >>$file <<EOF
+ETCD_LISTEN_CLIENT_IP: $(yaml-quote ${ETCD_LISTEN_CLIENT_IP})
 EOF
     fi
 

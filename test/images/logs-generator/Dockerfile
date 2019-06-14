@@ -19,4 +19,4 @@ ENV LOGS_GENERATOR_DURATION 1s
 
 COPY logs-generator /
 
-CMD ["sh", "-c", "/logs-generator --logtostderr --log-lines-total=${LOGS_GENERATOR_LINES_TOTAL} --run-duration=${LOGS_GENERATOR_DURATION}"]
+CMD ["/logs-generator", "--logtostderr", "--log-lines-total=${LOGS_GENERATOR_LINES_TOTAL}", "--run-duration=${LOGS_GENERATOR_DURATION}"]
