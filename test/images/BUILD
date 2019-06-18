@@ -23,6 +23,7 @@ filegroup(
         "//test/images/metadata-concealment:all-srcs",
         "//test/images/mounttest:all-srcs",
         "//test/images/nonewprivs:all-srcs",
+        "//test/images/pause:all-srcs",
         "//test/images/pets/peer-finder:all-srcs",
         "//test/images/porter:all-srcs",
         "//test/images/regression-issue-74839:all-srcs",
