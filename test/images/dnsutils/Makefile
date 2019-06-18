@@ -1,4 +1,4 @@
-# Copyright 2016 The Kubernetes Authors.
+# Copyright 2019 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM BASEIMAGE
-ADD ep ep
-ADD ep ep-2
-EXPOSE 8080
-ENTRYPOINT ["/ep"]
-CMD ["default", "arguments"]
+SRCS=hostname
+OS ?= linux
+ARCH ?= amd64
+TARGET ?= $(CURDIR)
+GOARM = 7
+GOLANG_VERSION ?= latest
+SRC_DIR = $(notdir $(shell pwd))
+export
+
+bin:
+	../image-util.sh bin $(SRCS)
+
+.PHONY: bin
