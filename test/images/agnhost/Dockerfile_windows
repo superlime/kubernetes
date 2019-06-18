@@ -1,4 +1,4 @@
-# Copyright 2018 The Kubernetes Authors.
+# Copyright 2019 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SRCS=crd_conversion_webhook
-OS ?= linux
-ARCH ?= amd64
-TARGET ?= $(CURDIR)
-GOLANG_VERSION ?= latest
-SRC_DIR = $(notdir $(shell pwd))
-export
+FROM BASEIMAGE
 
-bin:
-	../image-util.sh bin $(SRCS)
+# PORT 8080 needed by: netexec, nettest
+# PORT 8081 needed by: netexec
+# PORT 9376 needed by: serve-hostname
+EXPOSE 8080 8081 9376
 
-.PHONY: bin
+# from netexec
+RUN mkdir C:\uploads
+
+ADD agnhost agnhost
+ENTRYPOINT ["/agnhost"]
+CMD ["pause"]

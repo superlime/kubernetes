@@ -13,6 +13,7 @@
 # limitations under the License.
 
 SRCS=audit-proxy
+OS ?= linux
 ARCH ?= amd64
 TARGET ?= $(CURDIR)
 GOARM=7
