@@ -126,10 +126,11 @@ build() {
       # NOTE(claudiub): We're using a remote Windows node to build the Windows Docker images.
       # The node requires TLS authentication, and thus it is expected that the
       # ca.pem, cert.pem, key.pem files can be found in the ~/.docker folder.
-      docker --tlsverify -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
+      docker -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
     else
       echo "Cannot build the image '${IMAGE_NAME}' for ${os_name}/${arch}. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
     fi
+
     popd
   done
 }
@@ -174,7 +175,7 @@ push() {
       docker push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
     else
       # NOTE(claudiub): We're pushing the image we built on the remote Windows node.
-      docker --tlsverify -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
+      docker -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE_NAME}:${TAG}-${os_name}-${arch}"
     fi
   done
 
@@ -183,7 +184,7 @@ push() {
   # The manifest command is still experimental as of Docker 18.09.2
   export DOCKER_CLI_EXPERIMENTAL="enabled"
   # Make os_archs list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE_NAME}:${TAG}-linux-amd64 ${REGISTRY}/${IMAGE_NAME}:${TAG}-linux-ppc64le'
-  manifest=$(echo "$os_archs" | ${SED} "s~\/~-~" | ${SED} -e "s~[^ ]*~$REGISTRY\/IMAGE_NAME:$TAG\-&~g")
+  manifest=$(echo "$os_archs" | ${SED} "s~\/~-~" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE_NAME:$TAG\-&~g")
   docker manifest create --amend "${REGISTRY}/${IMAGE_NAME}:${TAG}" ${manifest}
   for os_arch in ${os_archs}; do
     if [[ $os_arch =~ .*/.* ]]; then
