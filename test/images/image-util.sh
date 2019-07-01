@@ -122,7 +122,7 @@ build() {
 
     if [[ "$os_name" = "linux" ]]; then
       docker build --pull -t "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}" .
-    elif [[ -v "REMOTE_DOCKER_URL" && ! -z "${REMOTE_DOCKER_URL}" ]]; then
+    elif [[ -n "${REMOTE_DOCKER_URL:-}" ]]; then
       # NOTE(claudiub): We're using a remote Windows node to build the Windows Docker images.
       # The node requires TLS authentication, and thus it is expected that the
       # ca.pem, cert.pem, key.pem files can be found in the ~/.docker folder.
@@ -152,7 +152,8 @@ push() {
     os_archs=$(listOsArchs)
     # NOTE(claudiub): if the REMOTE_DOCKER_URL var is not set, or it is an empty string, we must skip
     # pushing the Windows image and including it into the manifest list.
-    if [[ ((! -v "REMOTE_DOCKER_URL") || -z "${REMOTE_DOCKER_URL}") && -n "$(printf "%s\n" $os_archs | grep '^windows')" ]]; then
+    if [[ -z "${REMOTE_DOCKER_URL:-}" && -n "$(printf "%s\n" $os_archs | grep '^windows')" ]]; then
+
       echo "Skipping pushing the image '${IMAGE}' for Windows. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
       os_archs=$(printf "%s\n" $os_archs | grep -v "^windows")
     fi
