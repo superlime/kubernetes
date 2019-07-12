@@ -28,14 +28,15 @@ source "${KUBE_ROOT}/hack/lib/util.sh"
 declare -A QEMUARCHS=( ["amd64"]="x86_64" ["arm"]="arm" ["arm64"]="aarch64" ["ppc64le"]="ppc64le" ["s390x"]="s390x" )
 
 # Returns list of all supported architectures from BASEIMAGE file
-listArchs() {
+listOsArchs() {
   cut -d "=" -f 1 "${IMAGE}"/BASEIMAGE
 }
 
 # Returns baseimage need to used in Dockerfile for any given architecture
 getBaseImage() {
-  arch=$1
-  echo $(grep "${arch}=" BASEIMAGE | cut -d= -f2)
+  os_name=$1
+  arch=$2
+  echo $(grep "${os_name}/${arch}=" BASEIMAGE | cut -d= -f2)
 }
 
 # This function will build test image for all the architectures
@@ -44,15 +45,24 @@ getBaseImage() {
 # arm64, ppc64le, s390x
 build() {
   if [[ -f ${IMAGE}/BASEIMAGE ]]; then
-    archs=$(listArchs)
+    os_archs=$(listOsArchs)
   else
-    archs=${!QEMUARCHS[@]}
+    # prepend linux/ to the QEMUARCHS items.
+    os_archs=$(printf 'linux/%s\n' "${!QEMUARCHS[@]}")
   fi
 
   kube::util::ensure-gnu-sed
 
-  for arch in ${archs}; do
-    echo "Building image for ${IMAGE} ARCH: ${arch}..."
+  for os_arch in ${os_archs}; do
+    if [[ $os_arch =~ .*/.* ]]; then
+      os_name=$(echo $os_arch | cut -d "/" -f 1)
+      arch=$(echo $os_arch | cut -d "/" -f 2)
+    else
+      echo "The BASEIMAGE file for the ${IMAGE} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
+      exit 1
+    fi
+
+    echo "Building image for ${IMAGE} OS/ARCH: ${os_name}/${arch}..."
 
     # Create a temporary directory for every architecture and copy the image content
     # and build the image from temporary directory
@@ -64,16 +74,25 @@ build() {
     if [[ -f ${IMAGE}/Makefile ]]; then
       # make bin will take care of all the prerequisites needed
       # for building the docker image
-      make -C "${IMAGE}" bin ARCH="${arch}" TARGET="${temp_dir}"
+      make -C "${IMAGE}" bin OS="${os_name}" ARCH="${arch}" TARGET="${temp_dir}"
     fi
     pushd "${temp_dir}"
     # image tag
     TAG=$(<VERSION)
 
     if [[ -f BASEIMAGE ]]; then
-      BASEIMAGE=$(getBaseImage "${arch}")
-      ${SED} -i "s|BASEIMAGE|${BASEIMAGE}|g" Dockerfile
-      ${SED} -i "s|BASEARCH|${arch}|g" Dockerfile
+      BASEIMAGE=$(getBaseImage "${os_name}" "${arch}" | ${SED} "s|REGISTRY|${REGISTRY}|g")
+
+      # NOTE(claudiub): Some Windows images might require their own Dockerfile
+      # while simpler ones will not. If we're building for Windows, check if
+      # "Dockerfile_windows" exists or not.
+      dockerfile_name="Dockerfile"
+      if [[ "$os_name" = "windows" && -f "Dockerfile_windows" ]]; then
+        dockerfile_name="Dockerfile_windows"
+      fi
+
+      ${SED} -i "s|BASEIMAGE|${BASEIMAGE}|g" $dockerfile_name
+      ${SED} -i "s|BASEARCH|${arch}|g" $dockerfile_name
     fi
 
     # copy the qemu-*-static binary to docker image to build the multi architecture image on x86 platform
@@ -96,8 +115,16 @@ build() {
       fi
     fi
 
-    docker build --pull -t "${REGISTRY}/${IMAGE}-${arch}:${TAG}" .
-
+    if [[ "$os_name" = "linux" ]]; then
+      docker build --pull -t "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}" .
+    elif [[ -n "${REMOTE_DOCKER_URL:-}" ]]; then
+      # NOTE(claudiub): We're using a remote Windows node to build the Windows Docker images.
+      # The node requires TLS authentication, and thus it is expected that the
+      # ca.pem, cert.pem, key.pem files can be found in the ~/.docker folder.
+      docker --tlsverify -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}" -f $dockerfile_name .
+    else
+      echo "Cannot build the image '${IMAGE}' for ${os_name}/${arch}. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
+    fi
     popd
   done
 }
@@ -117,23 +144,51 @@ push() {
   docker_version_check
   TAG=$(<"${IMAGE}"/VERSION)
   if [[ -f ${IMAGE}/BASEIMAGE ]]; then
-    archs=$(listArchs)
+    os_archs=$(listOsArchs)
+    # NOTE(claudiub): if the REMOTE_DOCKER_URL var is not set, or it is an empty string, we must skip
+    # pushing the Windows image and including it into the manifest list.
+    if [[ -z "${REMOTE_DOCKER_URL:-}" && -n "$(printf "%s\n" $os_archs | grep '^windows')" ]]; then
+
+      echo "Skipping pushing the image '${IMAGE}' for Windows. REMOTE_DOCKER_URL should be set, containing the URL to a Windows docker daemon."
+      os_archs=$(printf "%s\n" $os_archs | grep -v "^windows")
+    fi
   else
-    archs=${!QEMUARCHS[@]}
+    # prepend linux/ to the QEMUARCHS items.
+    os_archs=$(printf 'linux/%s\n' "${!QEMUARCHS[@]}")
   fi
-  for arch in ${archs}; do
-    docker push "${REGISTRY}/${IMAGE}-${arch}:${TAG}"
+  for os_arch in ${os_archs}; do
+    if [[ $os_arch =~ .*/.* ]]; then
+      os_name=$(echo $os_arch | cut -d "/" -f 1)
+      arch=$(echo $os_arch | cut -d "/" -f 2)
+    else
+      echo "The BASEIMAGE file for the ${IMAGE} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
+      exit 1
+    fi
+
+    if [[ "$os_name" = "linux" ]]; then
+      docker push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
+    else
+      # NOTE(claudiub): We're pushing the image we built on the remote Windows node.
+      docker --tlsverify -H "${REMOTE_DOCKER_URL}" push "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
+    fi
   done
 
   kube::util::ensure-gnu-sed
 
   # The manifest command is still experimental as of Docker 18.09.2
   export DOCKER_CLI_EXPERIMENTAL="enabled"
-  # Make archs list into image manifest. Eg: 'amd64 ppc64le' to '${REGISTRY}/${IMAGE}-amd64:${TAG} ${REGISTRY}/${IMAGE}-ppc64le:${TAG}'
-  manifest=$(echo "$archs" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE\-&:$TAG~g")
+  # Make os_archs list into image manifest. Eg: 'linux/amd64 linux/ppc64le' to '${REGISTRY}/${IMAGE}:${TAG}-linux-amd64 ${REGISTRY}/${IMAGE}:${TAG}-linux-ppc64le'
+  manifest=$(echo "$os_archs" | ${SED} "s~\/~-~" | ${SED} -e "s~[^ ]*~$REGISTRY\/$IMAGE:$TAG\-&~g")
   docker manifest create --amend "${REGISTRY}/${IMAGE}:${TAG}" ${manifest}
-  for arch in ${archs}; do
-    docker manifest annotate --arch "${arch}" "${REGISTRY}/${IMAGE}:${TAG}" "${REGISTRY}/${IMAGE}-${arch}:${TAG}"
+  for os_arch in ${os_archs}; do
+    if [[ $os_arch =~ .*/.* ]]; then
+      os_name=$(echo $os_arch | cut -d "/" -f 1)
+      arch=$(echo $os_arch | cut -d "/" -f 2)
+    else
+      echo "The BASEIMAGE file for the ${IMAGE} image is not properly formatted. Expected entries to start with 'os/arch', found '${os_arch}' instead."
+      exit 1
+    fi
+    docker manifest annotate --os "${os_name}" --arch "${arch}" "${REGISTRY}/${IMAGE}:${TAG}" "${REGISTRY}/${IMAGE}:${TAG}-${os_name}-${arch}"
   done
   docker manifest push --purge "${REGISTRY}/${IMAGE}:${TAG}"
 }
@@ -150,7 +205,7 @@ bin() {
         golang:"${GOLANG_VERSION}" \
         /bin/bash -c "\
                 cd /go/src/k8s.io/kubernetes/test/images/${SRC_DIR} && \
-                CGO_ENABLED=0 ${arch_prefix} GOARCH=${ARCH} go build -a -installsuffix cgo --ldflags '-w' -o ${TARGET}/${SRC} ./$(dirname "${SRC}")"
+                CGO_ENABLED=0 ${arch_prefix} GOOS=${OS} GOARCH=${ARCH} go build -a -installsuffix cgo --ldflags '-w' -o ${TARGET}/${SRC} ./$(dirname "${SRC}")"
   done
 }
 
