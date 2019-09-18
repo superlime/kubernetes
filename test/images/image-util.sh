@@ -112,7 +112,7 @@ build() {
     fi
     pushd "${temp_dir}"
 
-    alias_name="$(cat ALIAS 2>/dev/null)"
+    alias_name="$(cat ALIAS 2>/dev/null || true)"
     if [[ -n "${alias_name}" ]]; then
       echo "Found an alias for '${image}'. Building / tagging image as '${alias_name}.'"
       image="${alias_name}"
@@ -193,7 +193,7 @@ push() {
     os_archs=$(printf 'linux/%s\n' "${!QEMUARCHS[*]}")
   fi
 
-  alias_name="$(cat ALIAS 2>/dev/null)"
+  alias_name="$(cat ALIAS 2>/dev/null || true)"
   if [[ -n "${alias_name}" ]]; then
     echo "Found an alias for '${image}'. Pushing image as '${alias_name}.'"
     image="${alias_name}"
