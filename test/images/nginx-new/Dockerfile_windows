@@ -13,13 +13,16 @@
 # limitations under the License.
 
 ARG BASEIMAGE
+FROM claudiubelu/windows-image-builder-helper:1.0 as helper
 FROM $BASEIMAGE
 
+COPY --from=helper /Windows/System32/netapi32.dll /Windows/System32/netapi32.dll
+
+USER ContainerAdministrator
 RUN mkdir C:\build\nginx\source &&\
-    powershell -Command "wget -uri 'http://nginx.org/download/nginx-1.15.12.zip' -OutFile 'C:\nginx.zip'" &&\
+    curl -L http://nginx.org/download/nginx-1.15.12.zip -o nginx.zip &\
     powershell -Command "Expand-Archive -Path C:\nginx.zip -DestinationPath C:\nginx -Force" &&\
     del C:\nginx.zip
-USER ContainerAdministrator
 RUN mkdir C:\usr\share &&\
     mklink /D C:\usr\share\nginx C:\nginx\nginx-1.15.12 &&\
     mklink C:\Windows\System32\sync.exe C:\Windows\System32\SyncHost.exe
