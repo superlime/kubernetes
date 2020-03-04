@@ -164,7 +164,7 @@ build() {
       # TODO(claudiub): add "build --isolation=hyperv" once GCE introduces Hyper-V support.
       docker --tlsverify --tlscacert "${DOCKER_CERT_BASE_PATH}/.docker-${os_version}/ca.pem" \
         --tlscert "${DOCKER_CERT_BASE_PATH}/.docker-${os_version}/cert.pem" --tlskey "${DOCKER_CERT_BASE_PATH}/.docker-${os_version}/key.pem" \
-        -H "${REMOTE_DOCKER_URL}" build --pull -t "${REGISTRY}/${image}:${TAG}-${os_name}-${arch}-${os_version}" \
+        -H "${REMOTE_DOCKER_URL}" build --no-cache --pull -t "${REGISTRY}/${image}:${TAG}-${os_name}-${arch}-${os_version}" \
         --build-arg BASEIMAGE="${BASEIMAGE}" -f $dockerfile_name .
     fi
     popd
